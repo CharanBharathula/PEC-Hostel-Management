@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">PEC Hostel Management</string>
+    <string-array name="persons">
+        <item>Choose type of login</item>
+        <item>Warden</item>
+        <item>Admin</item>
+    </string-array>
+</resources>
