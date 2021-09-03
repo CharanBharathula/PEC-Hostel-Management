@@ -10,6 +10,27 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PECHostelManagement">
         <activity
+            android:name=".SearchStudent"
+            android:exported="true" />
+        <activity
+            android:name=".CheckAttendance"
+            android:exported="true" />
+        <activity
+            android:name=".AddWarden"
+            android:exported="true" />
+        <activity
+            android:name=".AddStudent"
+            android:exported="true" />
+        <activity
+            android:name=".AdminProfileActivity"
+            android:exported="true" />
+        <activity
+            android:name=".WardenHomeActivity"
+            android:exported="true" />
+        <activity
+            android:name=".AdminHomeActivity"
+            android:exported="true" />
+        <activity
             android:name=".LoginActivity"
             android:exported="true" />
         <activity

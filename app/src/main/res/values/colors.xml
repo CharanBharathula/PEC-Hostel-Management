@@ -19,4 +19,13 @@
     <color name="tab_indicator_gray">#c0c0c0</color>
     <color name="intro_title_color">#000000</color>
     <color name="intro_description_color">#656565</color>
+
+
+    <color name="hintTextColor">#C8D4D6</color>
+    <color name="headerTextColor">#ECE3E3</color>
+    <color name="headerBackground">#240b36</color>
+    <color name="profileBackground">#FFFFFF</color>
+    <color name="profileTextBackground">#F0F2F4</color>
+    <color name="textColor">#FFFFFF</color>
+    <color name="linkTextColor">#C8DCE9</color>
 </resources>

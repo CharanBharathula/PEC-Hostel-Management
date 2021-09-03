@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "643610079421",
+    "firebase_url": "https://pec-hostel-management-default-rtdb.firebaseio.com",
+    "project_id": "pec-hostel-management",
+    "storage_bucket": "pec-hostel-management.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:643610079421:android:1e2bd44d8d8bc7502887d4",
+        "android_client_info": {
+          "package_name": "com.sscp.pechostelmanagement"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "643610079421-viossv68s7kj4eu1nq63okbfgnv3f83s.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAgiucWub-XwOfOKW_qApMl-j1ijuzGa_M"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "643610079421-viossv68s7kj4eu1nq63okbfgnv3f83s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
