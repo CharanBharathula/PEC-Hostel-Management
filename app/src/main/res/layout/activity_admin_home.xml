@@ -96,11 +96,12 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
                 <ImageView
                     android:id="@+id/add_student"
-                    android:src="@drawable/ic_add_students"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_add_students" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>

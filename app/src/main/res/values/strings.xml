@@ -5,4 +5,35 @@
         <item>Warden</item>
         <item>Admin</item>
     </string-array>
+
+    <string-array name="branches">
+        <item>Choose Branch</item>
+        <item>CSE</item>
+        <item>CSE - CyberSecurity</item>
+        <item>CSE - Artificial Intelligence</item>
+        <item>ECE</item>
+        <item>MECH</item>
+        <item>CIVIL</item>
+    </string-array>
+
+    <string-array name="year">
+        <item>Choose Year</item>
+        <item>Ist Year</item>
+        <item>IInd Year</item>
+        <item>IIIrd Year</item>
+        <item>IVth Year</item>
+    </string-array>
+
+    <string-array name="semester">
+        <item>Choose Semester</item>
+        <item>semester 1</item>
+        <item>semester 2</item>
+        <item>semester 3</item>
+        <item>semester 4</item>
+        <item>semester 5</item>
+        <item>semester 6</item>
+        <item>semester 7</item>
+        <item>semester 8</item>
+    </string-array>
+
 </resources>
