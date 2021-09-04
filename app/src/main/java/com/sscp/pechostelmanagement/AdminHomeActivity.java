@@ -60,6 +60,8 @@ public class AdminHomeActivity extends AppCompatActivity {
                 alert.show();
                 final TextInputLayout name=view.findViewById(R.id.warden_name);
                 final TextInputLayout mobile=view.findViewById(R.id.warden_mobile);
+                final TextInputLayout email=view.findViewById(R.id.warden_email);
+
                 Button submit=view.findViewById(R.id.register_warden);
 
                 submit.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +83,8 @@ public class AdminHomeActivity extends AppCompatActivity {
                             String id = ref.push().getKey();
                             studentDetails.put("warden_name",name.getEditText().getText().toString());
                             studentDetails.put("warden_mobile",mobile.getEditText().getText().toString());
+                            studentDetails.put("warden_email",email.getEditText().getText().toString());
+                            studentDetails.put("warden_password",mobile.getEditText().getText().toString());
                             ref.child(id).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
