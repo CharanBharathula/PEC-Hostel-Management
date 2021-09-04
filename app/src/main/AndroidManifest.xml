@@ -10,6 +10,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PECHostelManagement">
         <activity
+            android:name=".AddAttendance"
+            android:exported="true" />
+        <activity
             android:name=".SearchStudent"
             android:exported="true" />
         <activity

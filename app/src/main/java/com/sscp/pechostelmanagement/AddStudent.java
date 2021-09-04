@@ -103,6 +103,9 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
         studentDetails.put("branch",b);
         studentDetails.put("year",y);
         studentDetails.put("semester",s);
+        studentDetails.put("room_no", room);
+        studentDetails.put("roll_no", roll);
+
 
 
         ref.child(userid).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {

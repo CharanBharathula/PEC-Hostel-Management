@@ -1,20 +1,39 @@
 package com.sscp.pechostelmanagement;
 
 public class Student {
-    String userid, name, email, pass, mobile, imageurl, branch, year, sem;
+    String userid, studentname, email, password, mobile, imageurl, branch, year, semester, room_no, roll_no;
 
     Student(){}
 
-    public Student(String userid, String name, String email, String pass, String mobile, String imageurl, String branch, String year, String sem) {
+    public Student(String userid, String name, String email, String pass, String mobile,
+                   String imageurl, String branch, String year, String sem, String roomNo, String rollNo) {
         this.userid = userid;
-        this.name = name;
+        this.studentname = name;
         this.email = email;
-        this.pass = pass;
+        this.password = pass;
         this.mobile = mobile;
         this.imageurl = imageurl;
         this.branch = branch;
         this.year = year;
-        this.sem = sem;
+        this.semester = sem;
+        this.room_no = roomNo;
+        this.roll_no = rollNo;
+    }
+
+    public String getRollNo() {
+        return roll_no;
+    }
+
+    public void setRollNo(String rollNo) {
+        this.roll_no = rollNo;
+    }
+
+    public String getRoomNo() {
+        return room_no;
+    }
+
+    public void setRoomNo(String roomNo) {
+        this.room_no = roomNo;
     }
 
     public String getBranch() {
@@ -34,11 +53,11 @@ public class Student {
     }
 
     public String getSem() {
-        return sem;
+        return semester;
     }
 
     public void setSem(String sem) {
-        this.sem = sem;
+        this.semester = sem;
     }
 
     public String getUserid() {
@@ -50,11 +69,11 @@ public class Student {
     }
 
     public String getName() {
-        return name;
+        return studentname;
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.studentname = name;
     }
 
     public String getEmail() {
@@ -66,11 +85,11 @@ public class Student {
     }
 
     public String getPass() {
-        return pass;
+        return password;
     }
 
     public void setPass(String pass) {
-        this.pass = pass;
+        this.password = pass;
     }
 
     public String getMobile() {

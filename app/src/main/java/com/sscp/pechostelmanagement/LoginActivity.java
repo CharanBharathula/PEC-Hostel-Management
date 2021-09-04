@@ -19,6 +19,11 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.SignInMethodQueryResult;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -30,9 +35,8 @@ public class LoginActivity extends AppCompatActivity {
     Spinner selection;
     String loginType;
     boolean flag = false;
+    boolean isExist = false;
     ProgressDialog pd;
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,20 +102,40 @@ public class LoginActivity extends AppCompatActivity {
             signInAdmin(em, pass);
         else if(loginType.equals("Warden"))
         {
-            if(em.equals("peckulfy111@gmail.com"))
+            if(em.equals("peckulfy111@gmail.com")) {
+                pd.dismiss();
                 Toast.makeText(getApplicationContext(), "Sorry wrong option was choosen", Toast.LENGTH_SHORT).show();
+            }
             else {
-                Toast.makeText(getApplicationContext(), ""+checkExistence(), Toast.LENGTH_SHORT).show();
-                if (checkExistence())
-                    signInWarden(em, pass);
-                else
-                    signUpWarden(em, pass);
+                checkExistence(em, pass);
             }
         }
         else{
             pd.dismiss();
             Toast.makeText(getApplicationContext(), "Sorry wrong option was choosen", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private boolean wardenAdded(String em) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Warden");
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot snap:snapshot.getChildren()){
+
+                    Warden warden = snap.getValue(Warden.class);
+                    if(warden.getWarden_email().equals(em))
+                        isExist = true;
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+        return isExist;
+
     }
 
     private void signInAdmin(String em, String pass) {
@@ -159,7 +183,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signUpWarden(String em, String pass) {
-        auth.createUserWithEmailAndPassword(email.getEditText().getText().toString(), password.getEditText().getText().toString())
+        auth.createUserWithEmailAndPassword(em, pass)
                 .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -179,12 +203,31 @@ public class LoginActivity extends AppCompatActivity {
                 });
     }
 
-    private boolean checkExistence() {
-        auth.fetchSignInMethodsForEmail(email.getEditText().getText().toString())
-                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<SignInMethodQueryResult>() {
+    private boolean checkExistence(String em, String pass) {
+
+        auth.fetchSignInMethodsForEmail(em)
+                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
                     @Override
                     public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
-                        flag = task.getResult().getSignInMethods().isEmpty();
+
+                        if(task.isSuccessful()){
+                            if (task.getResult().getSignInMethods().isEmpty()){
+                                if(wardenAdded(em))
+                                    signUpWarden(em, pass);
+                                else {
+                                    email.setError("Sorry, you was not added by admin");
+                                    pd.dismiss();
+                                }
+                            }
+                            else {
+                                signInWarden(em, pass);
+                            }
+                        }
+                        else{
+                            Toast.makeText(getApplicationContext(), "Warden Checking process failed", Toast.LENGTH_SHORT).show();
+                            pd.dismiss();
+                        }
+
                     }
                 });
         return flag;
