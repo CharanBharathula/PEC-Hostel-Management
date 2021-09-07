@@ -19,6 +19,15 @@
     <color name="tab_indicator_gray">#c0c0c0</color>
     <color name="intro_title_color">#000000</color>
     <color name="intro_description_color">#656565</color>
+    <color name="colorBackground">#241445</color>
+
+    <color name="pink">#FF308E</color>
+    <color name="orange">#FA9301</color>
+    <color name="yellow">#F8D411</color>
+    <color name="blue">#20CBF3</color>
+    <color name="separatorColor">#18102C</color>
+    <color name="red">#F44336</color>
+    <color name="green">#009688</color>
 
 
     <color name="hintTextColor">#C8D4D6</color>

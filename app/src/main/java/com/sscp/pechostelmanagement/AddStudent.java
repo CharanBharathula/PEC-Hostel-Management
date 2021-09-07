@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -24,7 +25,9 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class AddStudent extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
@@ -37,6 +40,11 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getSupportActionBar().hide();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
         setContentView(R.layout.activity_add_student);
 
         Initialize();
@@ -91,7 +99,7 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
         progressDialog.show();
 
 
-        ref= FirebaseDatabase.getInstance().getReference().child("Students");
+        ref= FirebaseDatabase.getInstance().getReference();
         HashMap<String,Object> studentDetails=new HashMap<>();
         String userid = ref.push().getKey();
         studentDetails.put("userid",userid);
@@ -108,7 +116,7 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
 
 
 
-        ref.child(userid).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
+        ref.child("Students").child(userid).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -121,6 +129,25 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
                     FirebaseException e = (FirebaseException) task.getException();
                     Toast.makeText(AddStudent.this, "Failed Storing data: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                     progressDialog.dismiss();
+                }
+            }
+        });
+
+        addStudentToRoom(userid);
+    }
+
+    private void addStudentToRoom(String userid) {
+        List<String> list = new ArrayList<>();
+        list.add(room);
+        list.add(roll);
+        ref.child("RoomDetails").child(room).child(userid).setValue(list).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                if (task.isSuccessful())
+                    Toast.makeText(getApplicationContext(), "Student Successfully added", Toast.LENGTH_SHORT).show();
+                else{
+                    FirebaseException e = (FirebaseException) task.getException();
+                    Toast.makeText(AddStudent.this, "Failed Storing data: "+e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });

@@ -16,13 +16,19 @@
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_add_warden.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_admin_home.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_admin_profile.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_check_attendance.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_login.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_main.xml" value="0.19010416666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_warden_home.xml" value="0.25" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_item.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_layout.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_list_item.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_sub_item.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/layout_screen.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/list_child_item.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/list_header.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/profile_list_item.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/seperator_layout.xml" value="0.20416666666666666" />
       </map>
     </option>
   </component>

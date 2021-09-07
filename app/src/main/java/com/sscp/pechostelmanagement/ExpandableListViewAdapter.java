@@ -8,7 +8,14 @@ import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.CheckBox;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -16,11 +23,15 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
     Context mContext;
     List<String> roomNumbers;
     HashMap<String, List<String>> rollNumbers;
-
-    public ExpandableListViewAdapter(Context mContext, List<String> roomNumbers, HashMap<String, List<String>> rollNumbers) {
+    List<String> presentees;
+    AddAttendance obj;
+    String key;
+    public ExpandableListViewAdapter(Context mContext, List<String> roomNumbers, HashMap<String, List<String>> rollNumbers, ArrayList<String> list, AddAttendance addAttendance) {
         this.mContext = mContext;
         this.roomNumbers = roomNumbers;
         this.rollNumbers = rollNumbers;
+        presentees = list;
+        obj = addAttendance;
     }
 
     @Override
@@ -45,6 +56,28 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
         }
         TextView expandedListTextView = (TextView) convertView.findViewById(R.id.expandedListItem);
         CheckBox checkbox = (CheckBox) convertView.findViewById(R.id.check_box);
+        convertView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Attendance");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd, HH:mm:ss");
+                String currentDateAndTime = sdf.format(new Date());
+                String[] newString = currentDateAndTime.split(",");
+                newString[0] = newString[0].replace('.', '-');
+
+                if(checkbox.isChecked()) {
+                    checkbox.setChecked(false);
+                    presentees.remove(expandedListText);
+                    ref.child(key).child(newString[0]).child(newString[1]).removeValue();
+                }
+                else {
+                    checkbox.setChecked(true);
+                    ref.child(key).child(newString[0]).child(expandedListText).setValue(newString[1]);
+                    presentees.add(expandedListText);
+                }
+            }
+        });
+
         expandedListTextView.setText(expandedListText);
         return convertView;
     }
@@ -67,6 +100,12 @@ public class ExpandableListViewAdapter extends BaseExpandableListAdapter {
     @Override
     public long getGroupId(int listPosition) {
         return listPosition;
+    }
+
+    @Override
+    public void onGroupExpanded(int groupPosition) {
+        super.onGroupExpanded(groupPosition);
+        key = roomNumbers.get(groupPosition);
     }
 
     @Override

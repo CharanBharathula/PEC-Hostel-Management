@@ -224,7 +224,7 @@ public class LoginActivity extends AppCompatActivity {
                             }
                         }
                         else{
-                            Toast.makeText(getApplicationContext(), "Warden Checking process failed", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getApplicationContext(), "Warden Checking process failed. Please check your credentials", Toast.LENGTH_SHORT).show();
                             pd.dismiss();
                         }
 
