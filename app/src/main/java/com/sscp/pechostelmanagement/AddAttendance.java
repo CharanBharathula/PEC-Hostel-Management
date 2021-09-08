@@ -54,6 +54,8 @@ public class AddAttendance extends AppCompatActivity {
     HashMap<String, List<String>> map, attendance;
     ImageView upload;
     ProgressDialog pd;
+    SimpleDateFormat _12HourSDF, _24HourSDF;
+    Date _24HourDt;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -137,7 +139,8 @@ public class AddAttendance extends AppCompatActivity {
                         @Override
                         public void itemCreated(String str) {
                             View newSubItem = item.createSubItem();
-                            configureSubItem(item, newSubItem, str, title.getText().toString());
+                            if(newSubItem != null)
+                                configureSubItem(item, newSubItem, str, title.getText().toString());
                         }
                     });
                 }
@@ -160,7 +163,20 @@ public class AddAttendance extends AppCompatActivity {
         String currentDateAndTime = sdf.format(new Date());
         String[] newString = currentDateAndTime.split(",");
         newString[0] = newString[0].replace('.', '-');
-        ref.child("Attendance").child(newString[0]).child(newString[1]).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>() {
+        String[] timeArr = newString[1].split(":");
+        String newTime = timeArr[0]+":"+timeArr[1];
+
+        try {
+            String _24HourTime = newTime;
+            _24HourSDF = new SimpleDateFormat("HH:mm");
+            _12HourSDF = new SimpleDateFormat("hh:mm a");
+
+            _24HourDt = _24HourSDF.parse(_24HourTime);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        ref.child("Attendance").child(newString[0]).child(_12HourSDF.format(_24HourDt)).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -245,7 +261,7 @@ public class AddAttendance extends AppCompatActivity {
     }
 
 
-    private void retriveData() {
+    private void retrieveData() {
         //DatabaseReference ref = FirebaseDatabase.getInstance().getReference("RoomDetails");
 
         /*ref.addValueEventListener(new ValueEventListener() {

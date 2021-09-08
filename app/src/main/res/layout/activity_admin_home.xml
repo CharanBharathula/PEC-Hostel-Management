@@ -139,11 +139,12 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
                 <ImageView
                     android:id="@+id/check_attendance"
-                    android:src="@drawable/ic_check_attendance"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"/>
+                    android:layout_height="match_parent"
+                    android:src="@drawable/ic_check_attendance" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>

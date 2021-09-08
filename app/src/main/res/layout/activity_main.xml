@@ -18,7 +18,7 @@
         android:fontFamily="sans-serif-black"
         android:gravity="center"
         android:layout_marginTop="10dp"
-        android:text="Hostel Management"
+        android:text="PEC Hostel Management"
         android:textColor="#CD546C"
         android:textSize="25sp"
         android:textStyle="bold" />

@@ -15,6 +15,7 @@
         app:layout_constraintTop_toTopOf="parent"
         tools:layout_editor_absoluteX="5dp" >
         <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -48,15 +49,33 @@
             android:layout_height="40dp"/>
 
     </LinearLayout>
-    <Button
-        android:id="@+id/choose_date"
-        android:text="Choose Date"
-        android:textAllCaps="false"
-        android:layout_gravity="center"
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"/>
+    <LinearLayout
+
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:id="@+id/choose_date"
+            android:text="Choose Date"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:layout_weight="1"
+            android:id="@+id/choose_time"
+            android:text="Choose Time"
+            android:textAllCaps="false"
+            android:layout_margin="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
     <com.diegodobelo.expandingview.ExpandingList
         android:id="@+id/expanding_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:ignore="SpeakableTextPresentCheck" />
 </LinearLayout>

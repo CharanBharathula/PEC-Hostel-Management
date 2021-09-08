@@ -3,6 +3,7 @@ package com.sscp.pechostelmanagement;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.app.TimePickerDialog;
@@ -29,8 +30,10 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +44,13 @@ public class CheckAttendance extends AppCompatActivity {
     ExpandingList mExpandingList;
     HashMap<String, List<String>> map, attendance;
     DatabaseReference ref;
-    EditText search_date;
-    ImageView searchBtn;
+
     boolean flag;
     Button chooseDate;
     private int mYear, mMonth, mDay, mHour, mMinute;
     String datePicked;
+    String lastTimeTaken = null, timeChoosed;
+    Button chooseTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -58,22 +62,17 @@ public class CheckAttendance extends AppCompatActivity {
 
         mExpandingList = findViewById(R.id.expanding_list);
         attendance = new HashMap<>();
-        search_date = findViewById(R.id.search);
-        searchBtn = findViewById(R.id.search_btn);
         ref = FirebaseDatabase.getInstance().getReference();
         chooseDate = findViewById(R.id.choose_date);
-
-        searchBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-
-            }
-        });
+        chooseTime = findViewById(R.id.choose_time);
+        map = new HashMap<>();
 
         chooseDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                map.clear();
+
                 final Calendar c = Calendar.getInstance();
                 mYear = c.get(Calendar.YEAR);
                 mMonth = c.get(Calendar.MONTH);
@@ -93,30 +92,47 @@ public class CheckAttendance extends AppCompatActivity {
                                     d = "0"+dayOfMonth;
                                 datePicked = year + "-" + (m) + "-" + d;
 
-                                retrieveData(datePicked);
                             }
                         }, mYear, mMonth, mDay);
-                datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
+                //datePickerDialog.getDatePicker().setMinDate(System.currentTimeMillis());
                 datePickerDialog.show();
 
             }
         });
 
-        /*TimePickerDialog timePickerDialog = new TimePickerDialog(this,
-                new TimePickerDialog.OnTimeSetListener() {
+        chooseTime.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                map.clear();
+                TimePickerDialog timePickerDialog = new TimePickerDialog(CheckAttendance.this,
+                        new TimePickerDialog.OnTimeSetListener() {
 
-                    @Override
-                    public void onTimeSet(TimePicker view, int hourOfDay,
-                                          int minute) {
+                            @Override
+                            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
 
-                        //selectTime.setText(hourOfDay + ":" + minute);
-                    }
-                }, mHour, mMinute, false);
-        timePickerDialog.show();*/
+                                SimpleDateFormat _24HourSDF , _12HourSDF = null;
+                                Date _24HourDt = null;
+                                try {
+                                    String _24HourTime = hourOfDay+":"+minute;
+                                    _24HourSDF = new SimpleDateFormat("HH:mm");
+                                    _12HourSDF = new SimpleDateFormat("hh:mm a");
+                                    _24HourDt = _24HourSDF.parse(_24HourTime);
+
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                timeChoosed = _12HourSDF.format(_24HourDt);
+                                retrieveData(datePicked, timeChoosed);
+                            }
+                        }, mHour, mMinute, false);
+                timePickerDialog.show();
+            }
+        });
+
+
     }
 
     public void createItems(){
-        map = new HashMap<>();
 
         int[] colors = {R.color.black, R.color.blue, R.color.yellow, R.color.orange, R.color.pink};
 
@@ -148,27 +164,19 @@ public class CheckAttendance extends AppCompatActivity {
 
     }
 
-    public void retrieveData(String searched_date){
+    public void retrieveData(String searched_date, String search_time){
+
         flag = false;
-        ref.child("Attendance").addValueEventListener(new ValueEventListener() {
+        ref.child("Attendance").child(searched_date).child(search_time).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot date:snapshot.getChildren()){
+                for(DataSnapshot roomNumbers:snapshot.getChildren()){
 
-                    if(date.getKey().equals(searched_date)){
-                        for(DataSnapshot time:date.getChildren()){
+                    attendance.put(roomNumbers.getKey(), new ArrayList<String>());
 
-                            for(DataSnapshot roomNumbers:time.getChildren()){
-
-                                attendance.put(roomNumbers.getKey(), new ArrayList<String>());
-
-                                for(DataSnapshot key:roomNumbers.getChildren()){
-                                    attendance.get(roomNumbers.getKey()).add(key.getValue(String.class));
-                                }
-                            }
-                        }
+                    for(DataSnapshot rollNumber:roomNumbers.getChildren()){
                         flag = true;
-                        break;
+                        attendance.get(roomNumbers.getKey()).add(rollNumber.getValue(String.class));
                     }
                 }
 
@@ -178,6 +186,7 @@ public class CheckAttendance extends AppCompatActivity {
                 else{
                     Toast.makeText(getApplicationContext(), "Attendance was not taken on "+ datePicked, Toast.LENGTH_SHORT).show();
                 }
+
 
             }
 
@@ -218,19 +227,58 @@ public class CheckAttendance extends AppCompatActivity {
                     break;
                 }
             }
-            if (flag) {
-                text.setTextColor(getResources().getColor(R.color.red));
-            } else {
-                text.setTextColor(getResources().getColor(R.color.green));
-            }
-
-            text.setText(s);
-            ImageView imageView = view.findViewById(R.id.remove_sub_item);
-            CheckBox check = view.findViewById(R.id.select_student);
-            check.setVisibility(View.GONE);
-            imageView.setVisibility(View.GONE);
         }
+        if (flag) {
+            text.setTextColor(getResources().getColor(R.color.red));
+        } else {
+            text.setTextColor(getResources().getColor(R.color.green));
+        }
+        text.setText(s);
+        text.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+                retrieveStudent(text.getText().toString());
+            }
+        });
+        ImageView imageView = view.findViewById(R.id.remove_sub_item);
+        CheckBox check = view.findViewById(R.id.select_student);
+        check.setVisibility(View.GONE);
+        imageView.setVisibility(View.GONE);
+
 
     }
+
+    private void retrieveStudent(String rollNo) {
+        ref.child("Students").child(rollNo).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+
+                View view=getLayoutInflater().inflate(R.layout.student_layout,null);
+
+                AlertDialog.Builder builder=new AlertDialog.Builder(CheckAttendance.this);
+                builder.setView(view);
+
+                final AlertDialog alert=builder.create();
+                alert.show();
+
+                TextView name = view.findViewById(R.id.std_name);
+                name.setText(snapshot.child("studentname").getValue(String.class));
+                TextView mobile = view.findViewById(R.id.std_mobile);
+                mobile.setText(snapshot.child("mobile").getValue(String.class));
+                TextView roll = view.findViewById(R.id.std_roll);
+                roll.setText(snapshot.child("roll_no").getValue(String.class));
+                TextView branch = view.findViewById(R.id.std_branch);
+                branch.setText(snapshot.child("branch").getValue(String.class));
+
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
 
 }
