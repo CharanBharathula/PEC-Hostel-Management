@@ -2,10 +2,10 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context=".CheckAttendance">
+    tools:context=".AttendanceDateDetails">
 
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar2"
@@ -20,12 +20,12 @@
             android:layout_height="wrap_content">
 
             <ImageView
-                android:id="@+id/download_attendance"
+                android:id="@+id/download_entire_attendance"
                 android:src="@drawable/ic_cloud_download"
                 android:layout_width="50dp"
                 android:layout_height="50dp"/>
+
             <TextView
-                android:id="@+id/checkTitle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
@@ -34,36 +34,27 @@
                 android:fontFamily="@font/aclonica"
                 android:textSize="20sp" />
 
+
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
-
     <LinearLayout
-        android:visibility="gone"
         android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
         <Button
             android:layout_weight="1"
             android:layout_margin="10dp"
-            android:id="@+id/choose_date"
+            android:id="@+id/datePick"
             android:text="Choose Date"
             android:textAllCaps="false"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <Button
-            android:layout_weight="1"
-            android:id="@+id/choose_time"
-            android:text="Choose Time"
-            android:textAllCaps="false"
-            android:layout_margin="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
     </LinearLayout>
 
-    <com.diegodobelo.expandingview.ExpandingList
-        android:id="@+id/expanding_list"
+    <ListView
+        android:id="@+id/date_details"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:ignore="SpeakableTextPresentCheck" />
+        android:layout_height="match_parent"/>
+
 </LinearLayout>

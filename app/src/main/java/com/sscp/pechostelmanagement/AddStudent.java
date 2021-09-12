@@ -139,8 +139,8 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
     private void addStudentToRoom(String userid) {
         List<String> list = new ArrayList<>();
         list.add(room);
-        list.add(roll);
-        ref.child("RoomDetails").child(room).child(userid).setValue(list).addOnCompleteListener(new OnCompleteListener<Void>() {
+        list.add(userid);
+        ref.child("RoomDetails").child(room).child(roll).setValue(list).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if (task.isSuccessful())

@@ -43,15 +43,11 @@ import java.util.Random;
 
 public class AddAttendance extends AppCompatActivity {
 
-    /*ExpandableListView expandableListView;
-    ExpandableListViewAdapter expandableListViewAdapter;
 
-    List<String> expandableListTitle;
-    HashMap<String, List<String>> expandableListDetail;
-    public ArrayList<String> list = new ArrayList<>();*/
     DatabaseReference ref;
     ExpandingList mExpandingList;
-    HashMap<String, List<String>> map, attendance;
+    HashMap<String, List<String>> map;
+    HashMap<String, HashMap<String, String>> attendance;
     ImageView upload;
     ProgressDialog pd;
     SimpleDateFormat _12HourSDF, _24HourSDF;
@@ -86,7 +82,6 @@ public class AddAttendance extends AppCompatActivity {
     }
 
     public void createItems(){
-        map = new HashMap<>();
 
         int[] colors = {R.color.black, R.color.blue, R.color.yellow, R.color.orange, R.color.pink};
 
@@ -94,18 +89,18 @@ public class AddAttendance extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot roomNumbers:snapshot.getChildren()){
-                    map.put(roomNumbers.getKey(), new ArrayList<String>());
-                    attendance.put(roomNumbers.getKey(), new ArrayList<String>());
+
+                    attendance.put(roomNumbers.getKey(), new HashMap<>());
+
                     for(DataSnapshot snap:roomNumbers.getChildren()){
-                        map.get(roomNumbers.getKey()).add(snap.child("1").getValue(String.class));
+                        //map.get(roomNumbers.getKey()).add(snap.child("1").getValue(String.class));
+                        attendance.get(roomNumbers.getKey()).put(snap.getKey(), "Present");
                     }
+                    int rnd = new Random().nextInt(colors.length);
+                    addItem(roomNumbers.getKey(), new ArrayList<String>(attendance.get(roomNumbers.getKey()).keySet()) , colors[rnd]);
                 }
 
-                ArrayList<String> keys = new ArrayList<String>(map.keySet());
-                for(int i = 0;i<keys.size();i++){
-                    int rnd = new Random().nextInt(colors.length);
-                    addItem(keys.get(i), map.get(keys.get(i)), colors[rnd]);
-                }
+
             }
 
             @Override
@@ -117,7 +112,7 @@ public class AddAttendance extends AppCompatActivity {
 
     }
 
-    private void addItem(String s, List<String> arr1, int color) {
+    private void addItem(String s, ArrayList<String> arr1, int color) {
 
         ExpandingItem item = mExpandingList.createNewItem(R.layout.expanding_layout);
         if(item != null){
@@ -126,32 +121,20 @@ public class AddAttendance extends AppCompatActivity {
             TextView title = item.findViewById(R.id.title);
             title.setText(s);
             item.createSubItems(arr1.size());
+
             for(int i = 0;i<item.getSubItemsCount();i++){
                 View view = item.getSubItemView(i);
                 configureSubItem(item, view, arr1.get(i), title.getText().toString());
             }
             ImageView add = item.findViewById(R.id.add_more_sub_items);
 
-            add.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    showInsertDialog(new OnItemCreated(){
-                        @Override
-                        public void itemCreated(String str) {
-                            View newSubItem = item.createSubItem();
-                            if(newSubItem != null)
-                                configureSubItem(item, newSubItem, str, title.getText().toString());
-                        }
-                    });
-                }
-            });
+            add.setOnClickListener(view -> showInsertDialog(str -> {
+                View newSubItem = item.createSubItem();
+                if(newSubItem != null)
+                    configureSubItem(item, newSubItem, str, title.getText().toString());
+            }));
             View rmv = (ImageView)item.findViewById(R.id.remove_item);
-            rmv.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    mExpandingList.removeItem(item);
-                }
-            });
+            rmv.setOnClickListener(view -> mExpandingList.removeItem(item));
 
 
 
@@ -176,7 +159,8 @@ public class AddAttendance extends AppCompatActivity {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        ref.child("Attendance").child(newString[0]).child(_12HourSDF.format(_24HourDt)).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>() {
+        String date = _12HourSDF.format(_24HourDt);
+        ref.child("Attendance").child(newString[0]).child(date).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -226,10 +210,8 @@ public class AddAttendance extends AppCompatActivity {
                 if(check.isChecked()){
                     check.setChecked(false);
                     if(attendance.containsKey(title)){
-                        if(attendance.get(title) != null){
-                            for (Map.Entry<String, List<String>> entry : attendance.entrySet()) {
-                                entry.getValue().remove(s);
-                            }
+                        for (Map.Entry<String, HashMap<String, String>> entry : attendance.entrySet()) {
+                            entry.getValue().remove(s);
                         }
                     }
                 }
@@ -237,56 +219,18 @@ public class AddAttendance extends AppCompatActivity {
                     check.setChecked(true);
                     if(attendance.containsKey(title)){
                         if(attendance.get(title) != null){
-                            attendance.get(title).add(s);
+                            attendance.get(title).put(s, "Absent");
                         }
+                        else
+                            attendance.get(title).put(s, "Present");
                     }
                     //item.removeSubItem(view);
                 }
             }
         });
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if(item != null){
-                    if(attendance.containsKey(title)){
-                        if(attendance.get(title) != null){
-                            attendance.get(title).add(s);
-                        }
-                    }
-                    item.removeSubItem(view);
-                }
-            }
-        });
 
     }
 
-
-    private void retrieveData() {
-        //DatabaseReference ref = FirebaseDatabase.getInstance().getReference("RoomDetails");
-
-        /*ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot roomKeys:snapshot.getChildren()){
-                    expandableListDetail.put(roomKeys.getKey(), new ArrayList<>());
-                    for(DataSnapshot studentKeys:roomKeys.getChildren()){
-                        expandableListDetail.get(roomKeys.getKey()).add(studentKeys.child("1").getValue(String.class));
-                    }
-                }
-                expandableListTitle = new ArrayList<String>(expandableListDetail.keySet());
-
-                expandableListViewAdapter = new ExpandableListViewAdapter(getApplicationContext(), expandableListTitle, expandableListDetail, list, new AddAttendance());
-                expandableListView.setAdapter(expandableListViewAdapter);
-                Toast.makeText(getApplicationContext(), ""+list, Toast.LENGTH_SHORT).show();
-                expandableListViewAdapter.notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
-    }
 
 }
 

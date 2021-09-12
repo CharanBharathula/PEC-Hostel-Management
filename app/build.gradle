@@ -12,6 +12,7 @@ android {
         targetSdk 30
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -43,6 +44,7 @@ dependencies {
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
     implementation 'com.diegodobelo.expandingview:expanding-view:0.9.4'
+    implementation 'org.apache.poi:poi:3.17'
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'
