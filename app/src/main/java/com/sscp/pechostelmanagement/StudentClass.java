@@ -9,13 +9,10 @@ public class StudentClass {
     String password;
     String roll_no;
     String room_no;
-
     String semester;
     String studentname;
     String userid;
     String year;
-
-
 
     public StudentClass(String branch, String email, String imageurl, String mobile, String password, String roll_no, String room_no, String semester, String studentname, String userid, String year) {
         this.branch = branch;

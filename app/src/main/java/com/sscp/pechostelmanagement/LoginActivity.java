@@ -25,6 +25,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class LoginActivity extends AppCompatActivity {
 
     TextInputLayout email, password;
@@ -37,6 +40,9 @@ public class LoginActivity extends AppCompatActivity {
     boolean flag = false;
     boolean isExist = false;
     ProgressDialog pd;
+    String adminKey, adminEmail;
+    DatabaseReference ref;
+    private static Pattern EMAIL_REGEX= Pattern.compile("^[a-z0-9](\\.?[a-z0-9]){5,}@g(oogle)?mail\\.com$", Pattern.CASE_INSENSITIVE);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,20 +55,20 @@ public class LoginActivity extends AppCompatActivity {
 
         Initialize();
 
-        login.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        login.setOnClickListener(view -> {
 
-                username = email.getEditText().getText().toString();
-                pwd = password.getEditText().getText().toString();
-
-                if(username.trim().equals("") )
-                    Toast.makeText(LoginActivity.this, "Enter email please ", Toast.LENGTH_SHORT).show();
-                else if(pwd.trim().equals(""))
-                    Toast.makeText(LoginActivity.this, "Enter password please ", Toast.LENGTH_SHORT).show();
-                else
-                    checkUserType(username, pwd);
-            }
+            username = email.getEditText().getText().toString();
+            pwd = password.getEditText().getText().toString();
+            if(loginType.equals("Choose type of login"))
+                Toast.makeText(LoginActivity.this, "Choose Login Type Please", Toast.LENGTH_SHORT).show();
+            else if(!isValidEmail(username))
+                Toast.makeText(getApplicationContext(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            else if(username.trim().equals("") )
+                Toast.makeText(LoginActivity.this, "Enter email please ", Toast.LENGTH_SHORT).show();
+            else if(pwd.trim().equals(""))
+                Toast.makeText(LoginActivity.this, "Enter password please ", Toast.LENGTH_SHORT).show();
+            else
+                checkUserType(username, pwd);
         });
 
 
@@ -81,11 +87,17 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private boolean isValidEmail(String username) {
+        final Matcher matcher = EMAIL_REGEX.matcher(username);
+        return matcher.matches();
+    }
+
     private void Initialize() {
         email = findViewById(R.id.username);
         password = findViewById(R.id.pwd);
         login = findViewById(R.id.login_id);
 
+        ref = FirebaseDatabase.getInstance().getReference();
         auth=FirebaseAuth.getInstance();
         selection = findViewById(R.id.spinner);
     }
@@ -98,11 +110,11 @@ public class LoginActivity extends AppCompatActivity {
         pd.setCancelable(false);
         pd.show();
 
-        if(loginType.equals("Admin") && email.getEditText().getText().toString().equals("peckulfy111@gmail.com"))
+        if(loginType.equals("Admin") && email.getEditText().getText().toString().equals(adminEmail))
             signInAdmin(em, pass);
         else if(loginType.equals("Warden"))
         {
-            if(em.equals("peckulfy111@gmail.com")) {
+            if(em.equals(adminEmail)) {
                 pd.dismiss();
                 Toast.makeText(getApplicationContext(), "Sorry wrong option was choosen", Toast.LENGTH_SHORT).show();
             }
@@ -116,7 +128,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private boolean wardenAdded(String em) {
+    private boolean isWardenExists(String em) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReference("Warden");
         ref.addValueEventListener(new ValueEventListener() {
             @Override
@@ -124,6 +136,7 @@ public class LoginActivity extends AppCompatActivity {
                 for(DataSnapshot snap:snapshot.getChildren()){
 
                     Warden warden = snap.getValue(Warden.class);
+                    assert warden != null;
                     if(warden.getWarden_email().equals(em))
                         isExist = true;
                 }
@@ -139,23 +152,20 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void signInAdmin(String em, String pass) {
-        auth.signInWithEmailAndPassword(em,pass).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-            @Override
-            public void onComplete(@NonNull Task<AuthResult> task) {
-                if(task.isSuccessful())
-                {
-                    pd.dismiss();
-                    Intent intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                }
-                else
-                {
-                    FirebaseAuthException e = (FirebaseAuthException )task.getException();
-                    Toast.makeText(LoginActivity.this, "Login Failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                    pd.dismiss();
-                }
+        auth.signInWithEmailAndPassword(em,pass).addOnCompleteListener(task -> {
+            if(task.isSuccessful())
+            {
+                pd.dismiss();
+                Intent intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+            else
+            {
+                FirebaseAuthException e = (FirebaseAuthException )task.getException();
+                Toast.makeText(LoginActivity.this, "Login Failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                pd.dismiss();
             }
         });
     }
@@ -184,21 +194,18 @@ public class LoginActivity extends AppCompatActivity {
 
     private void signUpWarden(String em, String pass) {
         auth.createUserWithEmailAndPassword(em, pass)
-                .addOnCompleteListener(LoginActivity.this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if(task.isSuccessful()){
-                            Toast.makeText(getApplicationContext(), "SignUp Successfull as you are logged in for the first time", Toast.LENGTH_SHORT).show();
-                            Intent intent = new Intent(LoginActivity.this, WardenHomeActivity.class);
-                            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                            startActivity(intent);
-                            finish();
-                        }
-                        else{
-                            FirebaseAuthException e = (FirebaseAuthException )task.getException();
-                            Toast.makeText(LoginActivity.this, "Failed Registration: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                            pd.dismiss();
-                        }
+                .addOnCompleteListener(LoginActivity.this, task -> {
+                    if(task.isSuccessful()){
+                        Toast.makeText(getApplicationContext(), "SignUp Successfull as you are logged in for the first time", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(LoginActivity.this, WardenHomeActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intent);
+                        finish();
+                    }
+                    else{
+                        FirebaseAuthException e = (FirebaseAuthException )task.getException();
+                        Toast.makeText(LoginActivity.this, "Failed Registration: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                        pd.dismiss();
                     }
                 });
     }
@@ -206,54 +213,28 @@ public class LoginActivity extends AppCompatActivity {
     private boolean checkExistence(String em, String pass) {
 
         auth.fetchSignInMethodsForEmail(em)
-                .addOnCompleteListener(new OnCompleteListener<SignInMethodQueryResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<SignInMethodQueryResult> task) {
+                .addOnCompleteListener(task -> {
 
-                        if(task.isSuccessful()){
-                            if (task.getResult().getSignInMethods().isEmpty()){
-                                if(wardenAdded(em))
-                                    signUpWarden(em, pass);
-                                else {
-                                    email.setError("Sorry, you was not added by admin");
-                                    pd.dismiss();
-                                }
-                            }
+                    if(task.isSuccessful()){
+                        if (task.getResult().getSignInMethods().isEmpty()){
+                            if(isWardenExists(em))
+                                signUpWarden(em, pass);
                             else {
-                                signInWarden(em, pass);
+                                email.setError("Sorry, you was not added by admin");
+                                pd.dismiss();
                             }
                         }
-                        else{
-                            Toast.makeText(getApplicationContext(), "Warden Checking process failed. Please check your credentials", Toast.LENGTH_SHORT).show();
-                            pd.dismiss();
+                        else {
+                            signInWarden(em, pass);
                         }
-
                     }
+                    else{
+                        Toast.makeText(getApplicationContext(), "Warden Checking process failed. Please check your credentials", Toast.LENGTH_SHORT).show();
+                        pd.dismiss();
+                    }
+
                 });
         return flag;
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        fUser = FirebaseAuth.getInstance().getCurrentUser();
-        if(fUser!=null)
-        {
-            if(fUser.getUid().equals("kRQVOjvMOLgGpF6yuUFHso6TzGh1"))
-            {
-                Intent intent = new Intent(LoginActivity.this, AdminHomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }
-            else{
-                Intent intent = new Intent(LoginActivity.this, WardenHomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
-            }
-
-        }
     }
 }
 

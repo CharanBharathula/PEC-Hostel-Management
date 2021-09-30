@@ -35,6 +35,11 @@ import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -53,17 +58,17 @@ public class AttendanceTimeDetails extends AppCompatActivity {
     ArrayList<String> times;
     ArrayAdapter<String> adapter;
     HashMap<String, StudentClass> studentDetails;
-    String datePicked;
+    String datePicked, batch, year;
 
     ImageView download;
     int n = 0;
-    HSSFWorkbook workbook;
-    HSSFSheet sheet;
-    HSSFRow row;
-    HSSFCell cell;
+    XSSFWorkbook workbook;
+    XSSFSheet sheet;
+    XSSFRow row;
+    XSSFCell cell;
 
     File filePath;
-    HashMap<String, HashMap<String, HashMap<String, String>>> attendanceDetails;
+    HashMap<String, HashMap<String, String>> attendanceDetails;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,17 +90,7 @@ public class AttendanceTimeDetails extends AppCompatActivity {
             }
         }
 
-        Intent i = getIntent();
-        datePicked = i.getStringExtra("date");
-
-        listView = findViewById(R.id.time_details);
-        ref = FirebaseDatabase.getInstance().getReference();
-        download = findViewById(R.id.download_date_attendance);
-        workbook = new HSSFWorkbook();
-        sheet = workbook.createSheet();
-        studentDetails = new HashMap<>();
-
-        filePath = new File(Environment.getExternalStorageDirectory()+"/Attendance Consolidated on "+datePicked+".xls");
+        Initialization();
 
         listView.setOnItemClickListener((adapterView, view, i1, l) -> {
             Intent intent = new Intent(AttendanceTimeDetails.this, CheckAttendance.class);
@@ -103,7 +98,10 @@ public class AttendanceTimeDetails extends AppCompatActivity {
 
             intent.putExtra("date", datePicked);
             intent.putExtra("time", selectedItem);
-            i.putExtras(intent);
+            intent.putExtra("batch", batch);
+            intent.putExtra("year", year);
+
+            intent.putExtras(intent);
             startActivity(intent);
         });
 
@@ -112,6 +110,21 @@ public class AttendanceTimeDetails extends AppCompatActivity {
         download.setOnClickListener(v -> {
             addDataToExcel();
         });
+    }
+
+    private void Initialization() {
+        Intent i = getIntent();
+        datePicked = i.getStringExtra("date");
+        batch = i.getStringExtra("batch");
+        year = i.getStringExtra("year");
+
+        listView = findViewById(R.id.time_details);
+        ref = FirebaseDatabase.getInstance().getReference();
+        //download = findViewById(R.id.download_date_attendance);
+        workbook = new XSSFWorkbook();
+        studentDetails = new HashMap<>();
+
+        filePath = new File(Environment.getExternalStorageDirectory()+"/PEC Hostel Attendance Consolidated on "+datePicked+".xls");
     }
 
     private void addDataToExcel() {
@@ -124,10 +137,10 @@ public class AttendanceTimeDetails extends AppCompatActivity {
         cell.setCellValue("Roll No");
 
         cell = row.createCell(2);
-        cell.setCellValue("Time");
+        cell.setCellValue("Date");
 
         cell = row.createCell(3);
-        cell.setCellValue("Attendance");
+        cell.setCellValue("Attendance and Time");
 
         cell = row.createCell(4);
         cell.setCellValue("RoomNo");
@@ -136,64 +149,44 @@ public class AttendanceTimeDetails extends AppCompatActivity {
         cell.setCellValue("Mobile No");
 
         int n = 1;
-        List<String> times = new ArrayList<>(attendanceDetails.keySet());
+        List<String> rolls = new ArrayList<>(attendanceDetails.keySet());
+        sheet = workbook.createSheet(batch);
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.setWrapText(true);
 
-        for(String time:times){
-            List<String> rooms =  new ArrayList<>(attendanceDetails.get(time).keySet());
-            for(String roomNo:rooms){
-                List<String> rolls =  new ArrayList<>(attendanceDetails.get(time).get(roomNo).keySet());
-                for(String rollNo:rolls){
-                    row = sheet.createRow(n);
-                    sheet.setColumnWidth(0, 4000);
-                    cell = row.createCell(0);
-                    cell.setCellValue(studentDetails.get(rollNo).getStudentname());
+        for(String rollNo:rolls){
+            row = sheet.createRow(n);
+            sheet.setColumnWidth(0, 4000);
+            cell = row.createCell(0);
+            cell.setCellValue(studentDetails.get(rollNo).getStudentname());
 
-                    sheet.setColumnWidth(1, 4000);
-                    cell = row.createCell(1);
-                    cell.setCellValue(rollNo);
+            sheet.setColumnWidth(1, 4000);
+            cell = row.createCell(1);
+            cell.setCellValue(rollNo);
 
-                    sheet.setColumnWidth(2, 4000);
-                    cell = row.createCell(2);
-                    cell.setCellValue(time);
+            sheet.setColumnWidth(2, 4000);
+            cell = row.createCell(2);
+            cell.setCellValue(datePicked);
 
-                    sheet.setColumnWidth(3, 4000);
-                    cell = row.createCell(3);
-                    cell.setCellValue(datePicked);
-
-                    sheet.setColumnWidth(4, 4000);
-                    cell = row.createCell(4);
-                    cell.setCellValue(attendanceDetails.get(time).get(roomNo).get(rollNo));
-
-                    sheet.setColumnWidth(5, 4000);
-                    cell = row.createCell(5);
-                    cell.setCellValue(roomNo);
-
-                    sheet.setColumnWidth(6, 4000);
-                    cell = row.createCell(6);
-                    cell.setCellValue(studentDetails.get(rollNo).getMobile());
-
-                    n++;
-                }
-
+            for(String time:times){
+                sheet.setColumnWidth(2, 4000);
+                cell = row.createCell(2);
+                String val = time+" - "+attendanceDetails.get(rollNo).get(time)+"\n";
+                cell.setCellValue(val);
+                cell.setCellStyle(style);
             }
 
-            row = sheet.createRow(n + 1 );
-            cell = row.createCell(0);
-            cell.setCellValue("");
-            cell = row.createCell(1);
-            cell.setCellValue("");
-            cell = row.createCell(2);
-            cell.setCellValue("");
-            cell = row.createCell(3);
-            cell.setCellValue("");
+            sheet.setColumnWidth(4, 4000);
             cell = row.createCell(4);
-            cell.setCellValue("");
-            cell = row.createCell(5);
-            cell.setCellValue("");
-            cell = row.createCell(6);
-            cell.setCellValue("");
+            cell.setCellValue(studentDetails.get(rollNo).getRoom_no());
 
+            sheet.setColumnWidth(6, 4000);
+            cell = row.createCell(6);
+            cell.setCellValue(studentDetails.get(rollNo).getMobile());
+
+            n++;
         }
+
 
         try {
             if(!filePath.exists()){
@@ -217,27 +210,16 @@ public class AttendanceTimeDetails extends AppCompatActivity {
 
         attendanceDetails = new HashMap<>();
         times = new ArrayList<>();
-        ref.child("Attendance").child(datePicked).addValueEventListener(new ValueEventListener() {
+
+        ref.child("Attendance").child(batch).child(year).child(datePicked).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot time: snapshot.getChildren()){
+                for(DataSnapshot time:snapshot.getChildren()){
                     times.add(time.getKey());
-                    attendanceDetails.put(time.getKey(), new HashMap<>());
-                    for(DataSnapshot roomNo: time.getChildren()){
-                        Objects.requireNonNull(
-                                attendanceDetails.get(time.getKey())).put(roomNo.getKey(), new HashMap<>()
-                        );
-                        for(DataSnapshot roll:roomNo.getChildren()){
-                            Objects.requireNonNull(
-                                    attendanceDetails.get(time.getKey()).get(roomNo.getKey())).put(roll.getKey(), roll.getValue(String.class)
-                            );
-                        }
-                    }
                 }
                 adapter = new ArrayAdapter<>(AttendanceTimeDetails.this, android.R.layout.simple_list_item_1, times);
                 listView.setAdapter(adapter);
                 adapter.notifyDataSetChanged();
-
             }
 
             @Override
@@ -245,13 +227,20 @@ public class AttendanceTimeDetails extends AppCompatActivity {
 
             }
         });
-
-        ref.child("Students").addValueEventListener(new ValueEventListener() {
+        /*ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot snap:snapshot.getChildren()){
-                    studentDetails.put(snap.getKey(), snap.getValue(StudentClass.class));
+                for (DataSnapshot rollNo: snapshot.getChildren()){
+                    studentDetails.put(snapshot.getKey(), snapshot.getValue(StudentClass.class));
+                    attendanceDetails.put(rollNo.getKey(), new HashMap<>());
+                    for(DataSnapshot snap: rollNo.getChildren()){
+                        if(snap.getKey().equals("Attendance"))
+                            for(DataSnapshot date:snap.getChildren())
+                                for(DataSnapshot time:date.getChildren())
+                                    attendanceDetails.get(rollNo).put(time.getKey(), time.getValue(String.class));
+                    }
                 }
+                Toast.makeText(getApplicationContext(), ""+attendanceDetails, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -259,6 +248,7 @@ public class AttendanceTimeDetails extends AppCompatActivity {
 
             }
         });
+        */
 
     }
 

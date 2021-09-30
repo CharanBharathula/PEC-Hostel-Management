@@ -26,7 +26,7 @@ import java.util.HashMap;
 
 public class AdminHomeActivity extends AppCompatActivity {
 
-    ImageView gotoProfile, add_student, add_warden, check_attendance, search_student;
+    ImageView gotoProfile, add_student, add_warden, outing_requests, attendance;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,15 +39,11 @@ public class AdminHomeActivity extends AppCompatActivity {
         gotoProfile = findViewById(R.id.profile_icon);
         add_student = findViewById(R.id.add_student);
         add_warden = findViewById(R.id.add_warden);
-        search_student = findViewById(R.id.search_student);
-        check_attendance = findViewById(R.id.check_attendance);
+        attendance = findViewById(R.id.attendance);
+        outing_requests = findViewById(R.id.outing_requests);
 
-        add_student.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                startActivity(new Intent(AdminHomeActivity.this, AddStudent.class));
-            }
-        });
+        add_student.setOnClickListener(view -> startActivity(new Intent(AdminHomeActivity.this, AddStudent.class)));
+
         add_warden.setOnClickListener(v -> {
             View view=getLayoutInflater().inflate(R.layout.activity_add_warden,null);
 
@@ -104,8 +100,11 @@ public class AdminHomeActivity extends AppCompatActivity {
                 }
             });
         });
-        search_student.setOnClickListener(view -> startActivity(new Intent(AdminHomeActivity.this, SearchStudent.class)));
-        check_attendance.setOnClickListener(view -> startActivity(new Intent(AdminHomeActivity.this, AttendanceDateDetails.class)));
+
+        attendance.setOnClickListener(view -> startActivity(new Intent(AdminHomeActivity.this, Attendance.class)));
+
+        outing_requests.setOnClickListener(v->{ startActivity(new Intent(AdminHomeActivity.this, OutingRequets.class)); });
+
         gotoProfile.setOnClickListener(view -> startActivity(new Intent(AdminHomeActivity.this, AdminProfileActivity.class)));
 
     }

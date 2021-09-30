@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".UpdateAttendance">
+
+    <LinearLayout
+        android:layout_margin="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:id="@+id/upload_updated_attendance"
+            android:src="@drawable/ic_baseline_cloud_upload_24"
+            android:layout_width="50dp"
+            android:layout_height="50dp"/>
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Update Attendance"
+            android:fontFamily="@font/aclonica"
+            android:textSize="20sp" />
+
+    </LinearLayout>
+    <Button
+        android:id="@+id/time_choose"
+        android:layout_margin="10dp"
+        android:gravity="center"
+        android:text="Choose Time"
+        android:textAllCaps="false"
+        android:textSize="20sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Spinner
+        android:id="@+id/select_yr"
+        android:entries="@array/year"
+        android:layout_margin="10dp"
+        android:padding="15dp"
+        android:background="@drawable/border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <com.diegodobelo.expandingview.ExpandingList
+        android:id="@+id/expanding_list_students"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+</LinearLayout>

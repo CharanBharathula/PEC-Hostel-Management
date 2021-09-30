@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.AdapterView;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ExpandableListAdapter;
@@ -18,6 +19,7 @@ import android.widget.ExpandableListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,14 +46,24 @@ import java.util.Random;
 public class AddAttendance extends AppCompatActivity {
 
 
-    DatabaseReference ref;
     ExpandingList mExpandingList;
-    HashMap<String, List<String>> map;
-    HashMap<String, HashMap<String, String>> attendance;
+    Spinner year_selection;
     ImageView upload;
     ProgressDialog pd;
+
+    DatabaseReference ref;
     SimpleDateFormat _12HourSDF, _24HourSDF;
     Date _24HourDt;
+    HashMap<String, StudentClass> studentDetails;
+    HashMap<String, HashMap<String, String>> attendance;
+    HashMap<String, String> attendanceData;
+
+    String key;
+    String year;
+    String newTime;
+    String[] newString;
+    String[] months = {"january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"};
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -62,53 +74,95 @@ public class AddAttendance extends AppCompatActivity {
 
         setContentView(R.layout.activity_add_attendance);
 
-        mExpandingList = findViewById(R.id.expanding_list_main);
-        upload = findViewById(R.id.uplaod_attendance);
-        attendance = new HashMap<>();
-        ref = FirebaseDatabase.getInstance().getReference();
-        createItems();
+        Initialization();
 
-        upload.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                pd = new ProgressDialog(AddAttendance.this);
-                pd.setTitle("Uploading");
-                pd.setMessage("Please wait while the attendance is uploading");
-                addAttendance();
-            }
+        getCurrentDateAndTime();
+
+        upload.setOnClickListener(view -> {
+            pd = new ProgressDialog(AddAttendance.this);
+            pd.setTitle("Uploading");
+            pd.setMessage("Please wait while the attendance is uploading");
+            addAttendance();
+            pd.dismiss();
         });
 
+        year_selection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                year = adapterView.getItemAtPosition(i).toString();
+                createItems();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
 
     }
 
+    private void Initialization() {
+        mExpandingList = findViewById(R.id.expanding_list_main);
+        upload = findViewById(R.id.uplaod_attendance);
+        attendance = new HashMap<>();
+        attendanceData = new HashMap<>();
+        studentDetails = new HashMap<>();
+        ref = FirebaseDatabase.getInstance().getReference();
+        key = ref.push().getKey();
+        year_selection = findViewById(R.id.select_year);
+
+    }
+
+    private void getCurrentDateAndTime() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd, HH:mm:ss");
+        String currentDateAndTime = sdf.format(new Date());
+        newString = currentDateAndTime.split(",");
+        newString[0] = newString[0].replace('.', '-');
+        String[] timeArr = newString[1].split(":");
+        newTime = timeArr[0]+":"+timeArr[1];
+
+        try {
+            String _24HourTime = newTime;
+            _24HourSDF = new SimpleDateFormat("HH:mm");
+            _12HourSDF = new SimpleDateFormat("hh:mm a");
+
+            _24HourDt = _24HourSDF.parse(_24HourTime);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        newTime = _12HourSDF.format(_24HourDt);
+    }
+
     public void createItems(){
+        if(year == null)
+            Toast.makeText(getApplicationContext(), "Please choose year", Toast.LENGTH_SHORT).show();
+        else{
+            int[] colors = {R.color.black, R.color.blue, R.color.yellow, R.color.orange, R.color.pink};
 
-        int[] colors = {R.color.black, R.color.blue, R.color.yellow, R.color.orange, R.color.pink};
+            ref.child("RoomDetails").child(year).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for(DataSnapshot roomNumbers:snapshot.getChildren()){
 
-        ref.child("RoomDetails").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot roomNumbers:snapshot.getChildren()){
+                        attendance.put(roomNumbers.getKey(), new HashMap<>());
+                        for(DataSnapshot snap:roomNumbers.getChildren()){
+                            attendance.get(roomNumbers.getKey()).put(snap.getKey(), "Present");
+                            attendanceData.put(snap.getKey(), "Present");
+                        }
 
-                    attendance.put(roomNumbers.getKey(), new HashMap<>());
-
-                    for(DataSnapshot snap:roomNumbers.getChildren()){
-                        //map.get(roomNumbers.getKey()).add(snap.child("1").getValue(String.class));
-                        attendance.get(roomNumbers.getKey()).put(snap.getKey(), "Present");
+                        int rnd = new Random().nextInt(colors.length);
+                        addItem(roomNumbers.getKey(), new ArrayList<>(attendance.get(roomNumbers.getKey()).keySet()) , colors[rnd]);
                     }
-                    int rnd = new Random().nextInt(colors.length);
-                    addItem(roomNumbers.getKey(), new ArrayList<String>(attendance.get(roomNumbers.getKey()).keySet()) , colors[rnd]);
+
                 }
 
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
+                }
+            });
+        }
 
     }
 
@@ -128,109 +182,82 @@ public class AddAttendance extends AppCompatActivity {
             }
             ImageView add = item.findViewById(R.id.add_more_sub_items);
 
-            add.setOnClickListener(view -> showInsertDialog(str -> {
-                View newSubItem = item.createSubItem();
-                if(newSubItem != null)
-                    configureSubItem(item, newSubItem, str, title.getText().toString());
-            }));
-            View rmv = (ImageView)item.findViewById(R.id.remove_item);
+            View rmv = item.findViewById(R.id.remove_item);
             rmv.setOnClickListener(view -> mExpandingList.removeItem(item));
-
-
 
         }
     }
 
     private void addAttendance() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd, HH:mm:ss");
-        String currentDateAndTime = sdf.format(new Date());
-        String[] newString = currentDateAndTime.split(",");
-        newString[0] = newString[0].replace('.', '-');
-        String[] timeArr = newString[1].split(":");
-        String newTime = timeArr[0]+":"+timeArr[1];
-
-        try {
-            String _24HourTime = newTime;
-            _24HourSDF = new SimpleDateFormat("HH:mm");
-            _12HourSDF = new SimpleDateFormat("hh:mm a");
-
-            _24HourDt = _24HourSDF.parse(_24HourTime);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        String date = _12HourSDF.format(_24HourDt);
-        ref.child("Attendance").child(newString[0]).child(date).setValue(attendance).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if(task.isSuccessful()){
-                    pd.dismiss();
-                    Intent intent = new Intent(AddAttendance.this, WardenHomeActivity.class);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                    finish();
-                }
-                else{
-                    FirebaseAuthException e = (FirebaseAuthException )task.getException();
-                    Toast.makeText(AddAttendance.this, "Uploading Failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                    pd.dismiss();
-                }
+        String[] splitted = newString[0].split("-");
+        int currentMonth = Integer.parseInt(splitted[1]) - 1;
+        String currentYear = splitted[0];
+        ref.child("Attendance").child(year).child(currentYear).child(newString[0]).child(newTime).setValue(attendance).addOnCompleteListener(task -> {
+            if(task.isSuccessful()){
+                pd.dismiss();
+                Intent intent = new Intent(AddAttendance.this, WardenHomeActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                startActivity(intent);
+                finish();
+            }
+            else{
+                FirebaseAuthException e = (FirebaseAuthException )task.getException();
+                Toast.makeText(AddAttendance.this, "Uploading Failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
+                pd.dismiss();
             }
         });
 
-
-
-    }
-
-    private void showInsertDialog(OnItemCreated onItemCreated) {
-        EditText text = new EditText(this);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setView(text);
-        builder.setTitle("Add Item");
-        builder.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+        ref.child("Students").child(year).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                onItemCreated.itemCreated(text.getText().toString());
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot rollNo:snapshot.getChildren()){
+                    ref.child("Students").child(year).child(rollNo.getKey()).child("Attendance").child(newString[0]).child(newTime).setValue(attendanceData.get(rollNo.getKey()));
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
             }
         });
-        builder.setNegativeButton("Cancel", null);
-        builder.show();
+
     }
 
     private void configureSubItem(ExpandingItem item, View view, String s, String title) {
 
         TextView text = view.findViewById(R.id.sub_title);
         text.setText(s);
-        ImageView imageView = view.findViewById(R.id.remove_sub_item);
         CheckBox check = view.findViewById(R.id.select_student);
         LinearLayout lay = view.findViewById(R.id.sub_item_layout);
-        lay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(check.isChecked()){
-                    check.setChecked(false);
-                    if(attendance.containsKey(title)){
-                        for (Map.Entry<String, HashMap<String, String>> entry : attendance.entrySet()) {
-                            entry.getValue().remove(s);
-                        }
+        lay.setOnClickListener(view1 -> {
+            if(check.isChecked()){
+                check.setChecked(false);
+                if(attendance.containsKey(title)){
+                    for (Map.Entry<String, HashMap<String, String>> entry : attendance.entrySet()) {
+                        entry.getValue().remove(s);
+                    }
+                    attendanceData.put(s, "Present");
+                }
+            }
+            else{
+                check.setChecked(true);
+
+                if(attendance.containsKey(title)){
+                    if(attendance.get(title) != null){
+                        attendance.get(title).put(s, "Absent");
+                        attendanceData.put(s, "Absent");
+                    }
+                    else {
+                        attendance.get(title).put(s, "Present");
+                        attendanceData.put(s, "Present");
                     }
                 }
-                else{
-                    check.setChecked(true);
-                    if(attendance.containsKey(title)){
-                        if(attendance.get(title) != null){
-                            attendance.get(title).put(s, "Absent");
-                        }
-                        else
-                            attendance.get(title).put(s, "Present");
-                    }
-                    //item.removeSubItem(view);
-                }
+                //item.removeSubItem(view);
             }
         });
 
     }
-
 
 }
 

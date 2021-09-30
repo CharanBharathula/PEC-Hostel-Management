@@ -17,17 +17,27 @@
     </string-array>
 
     <string-array name="year">
-        <item>Choose Year</item>
-        <item>Ist Year</item>
-        <item>IInd Year</item>
-        <item>IIIrd Year</item>
-        <item>IVth Year</item>
+        <item>Choose Batch</item>
+        <item>2017-2021</item>
+        <item>2018-2022</item>
+        <item>2019-2023</item>
+        <item>2020-2024</item>
+        <item>2021-2025</item>
+        <item>2022-2026</item>
+        <item>2023-2027</item>
+        <item>2024-2028</item>
+        <item>2025-2029</item>
+        <item>2026-2030</item>
     </string-array>
 
     <string-array name="semester">
         <item>Choose Semester</item>
         <item>semester 1</item>
         <item>semester 2</item>
+        <item>semester 3</item>
+        <item>semester 4</item>
+        <item>semester 5</item>
+        <item>semester 6</item>
     </string-array>
 
 </resources>

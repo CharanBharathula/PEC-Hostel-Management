@@ -8,7 +8,10 @@
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/btn_gradient_style.xml" value="0.2203125" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_add_student.xml" value="0.2203125" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_add_students.xml" value="0.2203125" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_check_attendance.xml" value="0.2203125" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_consolidated_report.xml" value="0.2203125" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_logout_black.xml" value="0.2203125" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/ic_specific_report.xml" value="0.2203125" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/drawable/indicator_selector.xml" value="0.2203125" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/font/abril_fatface.xml" value="0.234375" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_add_attendance.xml" value="0.20416666666666666" />
@@ -16,11 +19,14 @@
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_add_warden.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_admin_home.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_admin_profile.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_attendance.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_attendance_date_details.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_attendance_time_details.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_check_attendance.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_login.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_main.xml" value="0.19010416666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_outing_requets.xml" value="0.19010416666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_update_attendance.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/activity_warden_home.xml" value="0.25" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_item.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/expanding_layout.xml" value="0.20416666666666666" />
@@ -32,6 +38,7 @@
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/profile_list_item.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/seperator_layout.xml" value="0.20416666666666666" />
         <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/layout/student_layout.xml" value="0.20416666666666666" />
+        <entry key="..\:/Users/APSSDC/AndroidStudioProjects/PECHostelManagement/app/src/main/res/mipmap-anydpi-v26/ic_hostel.xml" value="0.2203125" />
       </map>
     </option>
   </component>

@@ -24,10 +24,12 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
@@ -43,17 +45,19 @@ public class CheckAttendance extends AppCompatActivity {
     HashMap<String, HashMap<String, String>> attendance;
     DatabaseReference ref;
     HashMap<String, StudentClass> studentDetails;
+    HashMap<String, String> data;
 
     boolean flag;
-    int n = 0;
     String datePicked, timePicked;
     ImageView downloadAttendance;
+    String year;
 
-    HSSFWorkbook workbook;
-    HSSFSheet sheet;
-    HSSFRow row;
-    HSSFCell cell;
+    XSSFWorkbook workbook;
+    XSSFSheet sheet;
+    XSSFRow row;
+    XSSFCell cell;
     File filePath;
+    private String batch;
 
 
     @Override
@@ -85,16 +89,19 @@ public class CheckAttendance extends AppCompatActivity {
         ref = FirebaseDatabase.getInstance().getReference();
         downloadAttendance = findViewById(R.id.download_attendance);
         studentDetails = new HashMap<>();
+        data = new HashMap<>();
 
         Intent i = getIntent();
         datePicked = i.getStringExtra("date");
         timePicked = i.getStringExtra("time");
+        batch = i.getStringExtra("batch");
+        year = i.getStringExtra("year");
 
         filePath = new File(Environment.getExternalStorageDirectory()+"/Attendance on "+datePicked+".xls");
 
         map = new HashMap<>();
         //Initializing objects for creating excel File
-        workbook = new HSSFWorkbook();
+        workbook = new XSSFWorkbook();
         sheet = workbook.createSheet();
 
 
@@ -114,6 +121,8 @@ public class CheckAttendance extends AppCompatActivity {
     }
 
     private void addDataToExcel() {
+        XSSFCellStyle style = workbook.createCellStyle();
+        style.setWrapText(true);
 
         row = sheet.createRow(0);
 
@@ -124,19 +133,14 @@ public class CheckAttendance extends AppCompatActivity {
         cell.setCellValue("Roll No");
 
         cell = row.createCell(2);
-        cell.setCellValue("Time");
+        cell.setCellValue("RoomNo");
 
         cell = row.createCell(3);
-        cell.setCellValue("Date");
+        cell.setCellValue("Mobile No");
 
         cell = row.createCell(4);
         cell.setCellValue("Attendance");
 
-        cell = row.createCell(5);
-        cell.setCellValue("RoomNo");
-
-        cell = row.createCell(6);
-        cell.setCellValue("Mobile No");
 
         int n = 1;
         List<String> keys = new ArrayList<>(attendance.keySet());
@@ -144,13 +148,13 @@ public class CheckAttendance extends AppCompatActivity {
         for(int i = 0;i<attendance.size();i++){
 
             String roomNo = keys.get(i);
-            for(String rollNo:new ArrayList<>(attendance.get(roomNo).keySet())){
+            for(String rollNo:new ArrayList<>(Objects.requireNonNull(attendance.get(roomNo)).keySet())){
 
                 row = sheet.createRow(n);
 
                 sheet.setColumnWidth(0, 4000);
                 cell = row.createCell(0);
-                cell.setCellValue(studentDetails.get(rollNo).getStudentname());
+                cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
 
                 sheet.setColumnWidth(1, 4000);
                 cell = row.createCell(1);
@@ -158,24 +162,16 @@ public class CheckAttendance extends AppCompatActivity {
 
                 sheet.setColumnWidth(2, 4000);
                 cell = row.createCell(2);
-                cell.setCellValue(timePicked);
+                cell.setCellValue(roomNo);
 
                 sheet.setColumnWidth(3, 4000);
                 cell = row.createCell(3);
-                cell.setCellValue(datePicked);
+                cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
 
                 sheet.setColumnWidth(4, 4000);
                 cell = row.createCell(4);
-                cell.setCellValue(attendance.get(roomNo).get(rollNo));
-
-                sheet.setColumnWidth(5, 4000);
-                cell = row.createCell(5);
-                cell.setCellValue(roomNo);
-
-                sheet.setColumnWidth(6, 4000);
-                cell = row.createCell(6);
-                cell.setCellValue(studentDetails.get(rollNo).getMobile());
-
+                cell.setCellValue(datePicked+"\n"+timePicked+"-"+ Objects.requireNonNull(attendance.get(roomNo)).get(rollNo));
+                cell.setCellStyle(style);
                 n++;
             }
 
@@ -212,11 +208,10 @@ public class CheckAttendance extends AppCompatActivity {
     public void retrieveData(String searched_date, String search_time){
 
         flag = false;
-        ref.child("Attendance").child(searched_date).child(search_time).addValueEventListener(new ValueEventListener() {
+        ref.child("Attendance").child(batch).child(year).child(searched_date).child(search_time).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot roomNumbers:snapshot.getChildren()){
-
                     attendance.put(roomNumbers.getKey(), new HashMap<>());
                     flag = true;
                     for(DataSnapshot rollNumber:roomNumbers.getChildren()){
@@ -231,8 +226,6 @@ public class CheckAttendance extends AppCompatActivity {
                 else{
                     Toast.makeText(getApplicationContext(), "Attendance was not taken on "+ datePicked, Toast.LENGTH_SHORT).show();
                 }
-
-
             }
 
             @Override
@@ -241,11 +234,11 @@ public class CheckAttendance extends AppCompatActivity {
             }
         });
 
-        ref.child("Students").addValueEventListener(new ValueEventListener() {
+        ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot snap:snapshot.getChildren()){
-                    studentDetails.put(snap.getKey(), snap.getValue(StudentClass.class));
+                for(DataSnapshot rNo:snapshot.getChildren()){
+                    studentDetails.put(rNo.getKey(), rNo.getValue(StudentClass.class));
                 }
             }
 
@@ -254,6 +247,7 @@ public class CheckAttendance extends AppCompatActivity {
 
             }
         });
+
     }
 
     private void addItem(String s, HashMap<String, String> arr1, int color) {
@@ -278,9 +272,10 @@ public class CheckAttendance extends AppCompatActivity {
     private void configureSubItem(View view, String s, String title) {
 
         TextView text = view.findViewById(R.id.sub_title);
-        String isAbsent = attendance.get(title).get(s);
+        String isAbsent = Objects.requireNonNull(attendance.get(title)).get(s);
 
-        if(isAbsent.equalsIgnoreCase("yes"))
+        assert isAbsent != null;
+        if(isAbsent.equalsIgnoreCase("Absent"))
             text.setTextColor(getResources().getColor(R.color.red));
         else
             text.setTextColor(getResources().getColor(R.color.green));
@@ -297,6 +292,7 @@ public class CheckAttendance extends AppCompatActivity {
 
     private void retrieveStudent(String rollNo) {
         StudentClass student = studentDetails.get(rollNo);
+
         View view=getLayoutInflater().inflate(R.layout.student_layout,null);
 
         AlertDialog.Builder builder=new AlertDialog.Builder(CheckAttendance.this);
@@ -306,6 +302,7 @@ public class CheckAttendance extends AppCompatActivity {
         alert.show();
 
         TextView name = view.findViewById(R.id.std_name);
+        assert student != null;
         name.setText(student.getStudentname());
         TextView mobile = view.findViewById(R.id.std_mobile);
         mobile.setText(student.getMobile());

@@ -4,6 +4,7 @@ plugins {
 }
 
 android {
+
     compileSdk 30
 
     defaultConfig {
@@ -44,7 +45,9 @@ dependencies {
     api 'com.theartofdev.edmodo:android-image-cropper:2.8.+'
     implementation 'com.google.android.gms:play-services-auth:19.2.0'
     implementation 'com.diegodobelo.expandingview:expanding-view:0.9.4'
-    implementation 'org.apache.poi:poi:3.17'
+    implementation group: 'org.apache.poi', name: 'poi-ooxml', version: '4.1.2'
+    implementation 'javax.xml.stream:stax-api:1.0'
+
 
     testImplementation 'junit:junit:4.+'
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

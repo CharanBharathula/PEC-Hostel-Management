@@ -123,10 +123,10 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/search_student"
+                    android:id="@+id/attendance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_search_student" />
+                    android:src="@drawable/ic_attendance" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
 
@@ -141,10 +141,10 @@
                 android:layout_height="match_parent">
 
                 <ImageView
-                    android:id="@+id/check_attendance"
+                    android:id="@+id/outing_requests"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_check_attendance" />
+                    android:src="@drawable/ic_request" />
             </RelativeLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>

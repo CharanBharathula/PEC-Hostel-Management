@@ -8,12 +8,21 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/ic_icon"
+        android:icon="@mipmap/ic_hostel"
         android:label="@string/app_name"
         android:requestLegacyExternalStorage="true"
-        android:roundIcon="@mipmap/ic_icon"
+        android:roundIcon="@mipmap/ic_hostel"
         android:supportsRtl="true"
         android:theme="@style/Theme.PECHostelManagement">
+        <activity
+            android:name=".UpdateAttendance"
+            android:exported="true" />
+        <activity
+            android:name=".OutingRequets"
+            android:exported="true" />
+        <activity
+            android:name=".Attendance"
+            android:exported="true" />
         <activity
             android:name=".AttendanceDateDetails"
             android:exported="true" />

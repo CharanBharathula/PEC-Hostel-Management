@@ -37,6 +37,7 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
     String b, y, s, n, room, roll, mob, em;
     Button register;
     FirebaseAuth auth;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,7 +117,7 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
 
 
 
-        ref.child("Students").child(userid).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
+        ref.child("Students").child(y).child(userid).setValue(studentDetails).addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
                 if(task.isSuccessful()){
@@ -140,15 +141,12 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
         List<String> list = new ArrayList<>();
         list.add(room);
         list.add(userid);
-        ref.child("RoomDetails").child(room).child(roll).setValue(list).addOnCompleteListener(new OnCompleteListener<Void>() {
-            @Override
-            public void onComplete(@NonNull Task<Void> task) {
-                if (task.isSuccessful())
-                    Toast.makeText(getApplicationContext(), "Student Successfully added", Toast.LENGTH_SHORT).show();
-                else{
-                    FirebaseException e = (FirebaseException) task.getException();
-                    Toast.makeText(AddStudent.this, "Failed Storing data: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
+        ref.child("RoomDetails").child(y).child(room).child(roll).setValue(list).addOnCompleteListener(task -> {
+            if (task.isSuccessful())
+                Toast.makeText(getApplicationContext(), "Student Successfully added", Toast.LENGTH_SHORT).show();
+            else{
+                FirebaseException e = (FirebaseException) task.getException();
+                Toast.makeText(AddStudent.this, "Failed Storing data: "+e.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -164,6 +162,7 @@ public class AddStudent extends AppCompatActivity implements AdapterView.OnItemS
         register = findViewById(R.id.register_student);
         email = findViewById(R.id.student_email);
         auth=FirebaseAuth.getInstance();
+
     }
 
     @Override

@@ -37,6 +37,14 @@
 
         </LinearLayout>
     </androidx.appcompat.widget.Toolbar>
+    <Spinner
+        android:id="@+id/select_y"
+        android:entries="@array/year"
+        android:layout_margin="10dp"
+        android:padding="15dp"
+        android:background="@drawable/border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
     <LinearLayout
         android:orientation="horizontal"
         android:layout_width="match_parent"
@@ -44,8 +52,17 @@
         <Button
             android:layout_weight="1"
             android:layout_margin="10dp"
-            android:id="@+id/datePick"
-            android:text="Choose Date"
+            android:id="@+id/fromDatePick"
+            android:text="Choose From Date"
+            android:textAllCaps="false"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:visibility="gone"
+            android:layout_weight="1"
+            android:layout_margin="10dp"
+            android:id="@+id/toDatePick"
+            android:text="Choose To Date"
             android:textAllCaps="false"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
@@ -53,8 +70,14 @@
     </LinearLayout>
 
     <ListView
+        android:visibility="gone"
         android:id="@+id/date_details"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
+    <com.diegodobelo.expandingview.ExpandingList
+        android:id="@+id/expanding"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:ignore="SpeakableTextPresentCheck" />
 </LinearLayout>
