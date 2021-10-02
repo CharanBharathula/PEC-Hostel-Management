@@ -1,7 +1,6 @@
 package com.sscp.pechostelmanagement;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.AlertDialog;
@@ -15,11 +14,8 @@ import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -62,7 +58,7 @@ public class Attendance extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getSupportActionBar().hide();
+        Objects.requireNonNull(getSupportActionBar()).hide();
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_attendance);
@@ -76,16 +72,12 @@ public class Attendance extends AppCompatActivity {
         workbook = new XSSFWorkbook();
         pd = new ProgressDialog(this);
 
-        consolidated_reports.setOnClickListener(v->{
-            openDialog();
-        });
+        consolidated_reports.setOnClickListener(v-> openDialog());
 
         specific_reports.setOnClickListener(v->{
 
         });
-        check_attendance.setOnClickListener(v->{
-            startActivity(new Intent(Attendance.this, AttendanceDateDetails.class));
-        });
+        check_attendance.setOnClickListener(v-> startActivity(new Intent(Attendance.this, AttendanceDateDetails.class)));
 
     }
 
@@ -122,7 +114,7 @@ public class Attendance extends AppCompatActivity {
             pd.setMessage("Please wait the data was downloading");
             pd.show();
             y = year.getText().toString();
-            if(y != null && flag){
+            if(flag){
                 retrieveData(y);
                 filePath = new File(Environment.getExternalStorageDirectory()+"/PEC Hostel Attendance Consolidated"+batch+", "+y+".xls");
             }
@@ -143,13 +135,13 @@ public class Attendance extends AppCompatActivity {
                     count++;
                     data.put(rollNo.getKey(), new HashMap<>());
                     for(DataSnapshot child:rollNo.getChildren()){
-                        if(child.getKey().equals("Attendance")){
+                        if(Objects.equals(child.getKey(), "Attendance")){
                             for(DataSnapshot ye:child.getChildren()){
-                                if(ye.getKey().equals(year)){
+                                if(Objects.equals(ye.getKey(), year)){
                                     for(DataSnapshot date:ye.getChildren()){
-                                        data.get(rollNo.getKey()).put(date.getKey(), new HashMap<>());
+                                        Objects.requireNonNull(data.get(rollNo.getKey())).put(date.getKey(), new HashMap<>());
                                         for(DataSnapshot time:date.getChildren()){
-                                            data.get(rollNo.getKey()).get(date.getKey()).put(time.getKey(), time.getValue(String.class));
+                                            Objects.requireNonNull(Objects.requireNonNull(data.get(rollNo.getKey())).get(date.getKey())).put(time.getKey(), time.getValue(String.class));
                                         }
                                     }
                                 }
@@ -215,7 +207,7 @@ public class Attendance extends AppCompatActivity {
 
             sheet.setColumnWidth(0, 4000);
             cell = row.createCell(0);
-            cell.setCellValue(studentDetails.get(rollNo).getStudentname());
+            cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
 
             sheet.setColumnWidth(1, 4000);
             cell = row.createCell(1);
@@ -223,25 +215,25 @@ public class Attendance extends AppCompatActivity {
 
             sheet.setColumnWidth(2, 4000);
             cell = row.createCell(2);
-            cell.setCellValue(studentDetails.get(rollNo).getRoom_no());
+            cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getRoom_no());
 
             sheet.setColumnWidth(3, 4000);
             cell = row.createCell(3);
-            cell.setCellValue(studentDetails.get(rollNo).getMobile());
+            cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
 
-            List<String> dates = new ArrayList<>(data.get(rollNo).keySet());
+            List<String> dates = new ArrayList<>(Objects.requireNonNull(data.get(rollNo)).keySet());
 
             int c = 4;
 
             for(String date:dates){
                 sheet.setColumnWidth(c, 6000);
                 cell = row.createCell(c);
-                List<String> times = new ArrayList<>(data.get(rollNo).get(date).keySet());
-                StringBuilder val = new StringBuilder("");
+                List<String> times = new ArrayList<>(Objects.requireNonNull(Objects.requireNonNull(data.get(rollNo)).get(date)).keySet());
+                StringBuilder val = new StringBuilder();
                 for(String time:times){
                     val.append(time);
                     val.append("-");
-                    String att = data.get(rollNo).get(date).get(time);
+                    String att = Objects.requireNonNull(Objects.requireNonNull(data.get(rollNo)).get(date)).get(time);
                     val.append(att);
                 }
                 cell.setCellValue(date+"\n"+val+"\n");

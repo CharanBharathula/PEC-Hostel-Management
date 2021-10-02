@@ -73,11 +73,11 @@ public class AttendanceDateDetails extends AppCompatActivity {
     XSSFRow row;
     XSSFCell cell;
     File filePath;
-    ProgressDialog pd;
+    ProgressDialog pd, pd1;
 
     HashMap<String, List<String>> dates;
     HashMap<String, StudentClass> studentDetails;
-    HashMap<String, HashMap<String, HashMap<String, String>>> data;
+    HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> data;
 
     String fromDatePicked;
     String batch;
@@ -100,12 +100,20 @@ public class AttendanceDateDetails extends AppCompatActivity {
         setContentView(R.layout.activity_attendance_date_details);
 
         Initialization();
+        pd1 = new ProgressDialog(this);
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 batch = adapterView.getItemAtPosition(i).toString();
-                if(!batch.equals("Choose Batch"))
+                if(!batch.equals("Choose Batch")){
+                    filePath = new File(Environment.getExternalStorageDirectory()+"/PEC HAC Report Batch Wise for "+batch+".xls");
+
+                    pd1.setTitle("Retrieving Data");
+                    pd1.setMessage("Please Wait while fetching the attendance data");
+                    pd1.setCancelable(false);
+                    pd1.show();
                     retrieveData(batch);
+                }
             }
 
             @Override
@@ -118,6 +126,7 @@ public class AttendanceDateDetails extends AppCompatActivity {
             if(dates.size() != 0){
                 pd.setTitle("Downloading");
                 pd.setMessage("Please wait the data was downloading");
+                pd.setCancelable(false);
                 pd.show();
                 addDataToExcel();
             }
@@ -166,7 +175,6 @@ public class AttendanceDateDetails extends AppCompatActivity {
 
         });
 
-        filePath = new File(Environment.getExternalStorageDirectory()+"/PEC Hostel Attendance Consolidated.xls");
     }
 
     private void Initialization() {
@@ -211,7 +219,6 @@ public class AttendanceDateDetails extends AppCompatActivity {
                     for(DataSnapshot rNo:snapshot.getChildren()){
                         studentDetails.put(rNo.getKey(), rNo.getValue(StudentClass.class));
                     }
-
                     retrieveAttendance();
                 }
 
@@ -228,81 +235,87 @@ public class AttendanceDateDetails extends AppCompatActivity {
 
     private void addDataToExcel() {
 
-        int sheetCount = workbook.getNumberOfSheets();
+        List<String> years = new ArrayList<>(dates.keySet());
 
-        boolean flag = false;
-        for(int i = 0;i<sheetCount;i++){
-            if(workbook.getSheetName(i).equals(batch)) {
-                flag = true;
-                sheet = workbook.getSheet(batch);
-            }
-        }
-        if(!flag)
-            sheet = workbook.createSheet(batch);
-        XSSFCellStyle style = workbook.createCellStyle();
-        style.setWrapText(true);
+        for(String year:years)
+        {
+            int sheetCount = workbook.getNumberOfSheets();
 
-        row = sheet.createRow(0);
-
-        cell = row.createCell(0);
-        cell.setCellValue("Name");
-
-        cell = row.createCell(1);
-        cell.setCellValue("Roll No");
-
-        cell = row.createCell(2);
-        cell.setCellValue("RoomNo");
-
-        cell = row.createCell(3);
-        cell.setCellValue("Mobile No");
-
-        cell = row.createCell(4);
-        cell.setCellValue("Date and Time");
-
-        int n = 1;
-        List<String> keys = new ArrayList<>(data.keySet());
-        for(String rollNo:keys){
-
-
-            row = sheet.createRow(n);
-
-            sheet.setColumnWidth(0, 4000);
-            cell = row.createCell(0);
-            cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
-
-            sheet.setColumnWidth(1, 4000);
-            cell = row.createCell(1);
-            cell.setCellValue(rollNo);
-
-            sheet.setColumnWidth(2, 4000);
-            cell = row.createCell(2);
-            cell.setCellValue(studentDetails.get(rollNo).getRoom_no());
-
-            sheet.setColumnWidth(3, 4000);
-            cell = row.createCell(3);
-            cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
-
-            List<String> dates = new ArrayList<>(data.get(rollNo).keySet());
-
-            int c = 4;
-
-            for(String date:dates){
-                sheet.setColumnWidth(c, 6000);
-                cell = row.createCell(c);
-                List<String> times = new ArrayList<>(data.get(rollNo).get(date).keySet());
-                StringBuilder val = new StringBuilder("");
-                for(String time:times){
-                    val.append(time);
-                    val.append("-");
-                    String att = data.get(rollNo).get(date).get(time);
-                    val.append(att);
+            boolean flag = false;
+            for(int i = 0;i<sheetCount;i++){
+                if(workbook.getSheetName(i).equals(batch)) {
+                    flag = true;
+                    sheet = workbook.getSheet(batch);
                 }
-                cell.setCellValue(date+"\n"+val+"\n");
-                cell.setCellStyle(style);
-                c++;
             }
+            if(!flag)
+                sheet = workbook.createSheet(year);
+            XSSFCellStyle style = workbook.createCellStyle();
+            style.setWrapText(true);
 
-            n++;
+            row = sheet.createRow(0);
+
+            cell = row.createCell(0);
+            cell.setCellValue("Name");
+
+            cell = row.createCell(1);
+            cell.setCellValue("Roll No");
+
+            cell = row.createCell(2);
+            cell.setCellValue("RoomNo");
+
+            cell = row.createCell(3);
+            cell.setCellValue("Mobile No");
+
+            cell = row.createCell(4);
+            cell.setCellValue("Date and Time");
+
+            int n = 1;
+            List<String> keys = new ArrayList<>(data.keySet());
+            for(String rollNo:keys){
+                if(data.get(rollNo).keySet().contains(year)){
+
+                    row = sheet.createRow(n);
+
+                    sheet.setColumnWidth(0, 4000);
+                    cell = row.createCell(0);
+                    cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
+
+                    sheet.setColumnWidth(1, 4000);
+                    cell = row.createCell(1);
+                    cell.setCellValue(rollNo);
+
+                    sheet.setColumnWidth(2, 4000);
+                    cell = row.createCell(2);
+                    cell.setCellValue(studentDetails.get(rollNo).getRoom_no());
+
+                    sheet.setColumnWidth(3, 4000);
+                    cell = row.createCell(3);
+                    cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
+
+                    List<String> currentDates = new ArrayList<>(data.get(rollNo).get(year).keySet());
+
+                    int c = 4;
+
+                    for(String date:currentDates){
+                        sheet.setColumnWidth(c, 6000);
+                        cell = row.createCell(c);
+                        List<String> times = new ArrayList<>(data.get(rollNo).get(year).get(date).keySet());
+                        StringBuilder val = new StringBuilder("");
+                        for(String time:times){
+                            val.append(time);
+                            val.append("-");
+                            String att = data.get(rollNo).get(year).get(date).get(time);
+                            val.append(att);
+                        }
+                        cell.setCellValue(date+"\n"+val+"\n");
+                        cell.setCellStyle(style);
+                        c++;
+                    }
+
+                    n++;
+                }
+            }
         }
 
         try {
@@ -318,6 +331,7 @@ public class AttendanceDateDetails extends AppCompatActivity {
         }
         catch (Exception e){
             Toast.makeText(getApplicationContext(), "Exception:"+e, Toast.LENGTH_SHORT).show();
+            pd.dismiss();
         }
 
     }
@@ -325,25 +339,33 @@ public class AttendanceDateDetails extends AppCompatActivity {
     private void retrieveAttendance() {
         List<String> keys = new ArrayList<>(studentDetails.keySet());
         data = new HashMap<>();
-        for(String rollNo:keys){
-            ref.child("Students").child(batch).child(rollNo).child("Attendance").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    data.put(rollNo, new HashMap<>());
-                    for(DataSnapshot date:snapshot.getChildren()){
-                        data.get(rollNo).put(date.getKey(), new HashMap<>());
-                        for(DataSnapshot time:date.getChildren()){
-                            data.get(rollNo).get(date.getKey()).put(time.getKey(), time.getValue(String.class));
+        if(keys.size() > 0){
+            for(String rollNo:keys){
+                ref.child("Students").child(batch).child(rollNo).child("Attendance").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        data.put(rollNo, new HashMap<>());
+                        for(DataSnapshot year:snapshot.getChildren()){
+                            data.get(rollNo).put(year.getKey(), new HashMap<>());
+                            for(DataSnapshot date:year.getChildren()){
+                                data.get(rollNo).get(year.getKey()).put(date.getKey(), new HashMap<>());
+                                for(DataSnapshot time:date.getChildren()){
+                                    data.get(rollNo).get(year.getKey()).get(date.getKey()).put(time.getKey(), time.getValue(String.class));
+                                }
+                            }
                         }
+                        pd1.dismiss();
                     }
-                }
 
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
 
-                }
-            });
+                    }
+                });
+            }
         }
+        else
+            Toast.makeText(getApplicationContext(), "No Students are there", Toast.LENGTH_SHORT).show();
     }
 
     public void createItems(){

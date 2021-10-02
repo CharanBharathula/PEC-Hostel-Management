@@ -55,8 +55,23 @@ public class LoginActivity extends AppCompatActivity {
 
         Initialize();
 
-        login.setOnClickListener(view -> {
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                adminEmail = snapshot.child("Admin").child("email").getValue(String.class);
+                adminKey = snapshot.child("Admin").child("key").getValue(String.class);
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Toast.makeText(getApplicationContext(), ""+error.toException(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
+
+
+        login.setOnClickListener(view -> {
+            Toast.makeText(getApplicationContext(), ""+adminEmail, Toast.LENGTH_SHORT).show();
             username = email.getEditText().getText().toString();
             pwd = password.getEditText().getText().toString();
             if(loginType.equals("Choose type of login"))
