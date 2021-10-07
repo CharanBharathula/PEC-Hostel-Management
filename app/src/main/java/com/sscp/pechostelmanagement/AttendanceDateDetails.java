@@ -2,13 +2,17 @@ package com.sscp.pechostelmanagement;
 
 import static org.apache.poi.hssf.usermodel.HSSFFont.*;
 
+import android.Manifest;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
+import android.provider.Settings;
+import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
@@ -16,6 +20,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -23,6 +28,8 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 
 import com.diegodobelo.expandingview.ExpandingItem;
 import com.diegodobelo.expandingview.ExpandingList;
@@ -32,32 +39,18 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.apache.poi.hssf.usermodel.HSSFCell;
-import org.apache.poi.hssf.usermodel.HSSFCellStyle;
-import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFRow;
-import org.apache.poi.hssf.usermodel.HSSFSheet;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.hssf.util.HSSFColor;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
-import org.apache.poi.ss.usermodel.BorderStyle;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
 import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -78,10 +71,11 @@ public class AttendanceDateDetails extends AppCompatActivity {
     HashMap<String, List<String>> dates;
     HashMap<String, StudentClass> studentDetails;
     HashMap<String, HashMap<String, HashMap<String, HashMap<String, String>>>> data;
+    HashMap<String, String> pre, abs, tot;
 
-    String fromDatePicked;
-    String batch;
+    String fromDatePicked, batch, p, a, t;
     private int mMonth, mDay,  mYear;
+    boolean nodata = false;
 
     ImageView download;
     ListView listView;
@@ -100,12 +94,16 @@ public class AttendanceDateDetails extends AppCompatActivity {
         setContentView(R.layout.activity_attendance_date_details);
 
         Initialization();
+
+        requestForPermission();
+
         pd1 = new ProgressDialog(this);
         sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 batch = adapterView.getItemAtPosition(i).toString();
                 if(!batch.equals("Choose Batch")){
+                    getAttendanceCount();
                     filePath = new File(Environment.getExternalStorageDirectory()+"/PEC HAC Report Batch Wise for "+batch+".xls");
 
                     pd1.setTitle("Retrieving Data");
@@ -177,6 +175,40 @@ public class AttendanceDateDetails extends AppCompatActivity {
 
     }
 
+    private void getAttendanceCount() {
+        ref.child("Attendance").child(batch).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                pre = new HashMap<>();
+                abs = new HashMap<>();
+                tot = new HashMap<>();
+
+                for(DataSnapshot year:snapshot.getChildren()){
+                    for(DataSnapshot date: year.getChildren()){
+                        for(DataSnapshot time: date.getChildren()){
+                            for(DataSnapshot child:time.getChildren()){
+                                if(child.getKey().equals("count")){
+                                    p = String.valueOf(child.child("presents").getValue(String.class));
+                                    a = String.valueOf(child.child("absents").getValue(String.class));
+                                    t = String.valueOf(child.child("total").getValue(String.class));
+                                }
+                                pre.put(time.getKey()+date.getKey(), p);
+                                abs.put(time.getKey()+date.getKey(), a);
+                                tot.put(time.getKey()+date.getKey(), t);
+
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
     private void Initialization() {
         chooseFromDate = findViewById(R.id.fromDatePick);
         chooseToDate = findViewById(R.id.toDatePick);
@@ -205,21 +237,12 @@ public class AttendanceDateDetails extends AppCompatActivity {
                             dates.get(year.getKey()).add(date.getKey());
                         }
                     }
-                    createItems();
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-            ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                    for(DataSnapshot rNo:snapshot.getChildren()){
-                        studentDetails.put(rNo.getKey(), rNo.getValue(StudentClass.class));
+                    if(dates.size() == 0){
+                        noDataFound();
+                        nodata = true;
                     }
-                    retrieveAttendance();
+                    else
+                        createItems();
                 }
 
                 @Override
@@ -227,6 +250,22 @@ public class AttendanceDateDetails extends AppCompatActivity {
 
                 }
             });
+            if(!nodata){
+                ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot snapshot) {
+                        for(DataSnapshot rNo:snapshot.getChildren()){
+                            studentDetails.put(rNo.getKey(), rNo.getValue(StudentClass.class));
+                        }
+                        retrieveAttendance();
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError error) {
+
+                    }
+                });
+            }
         }
         else
             Toast.makeText(getApplicationContext(), "Please choose year", Toast.LENGTH_SHORT).show();
@@ -234,6 +273,12 @@ public class AttendanceDateDetails extends AppCompatActivity {
     }
 
     private void addDataToExcel() {
+
+        XSSFFont presentFont = workbook.createFont();
+        presentFont.setColor(IndexedColors.GREEN.getIndex());
+
+        XSSFFont absentFont = workbook.createFont();
+        absentFont.setColor(IndexedColors.RED.getIndex());
 
         List<String> years = new ArrayList<>(dates.keySet());
 
@@ -251,27 +296,53 @@ public class AttendanceDateDetails extends AppCompatActivity {
             if(!flag)
                 sheet = workbook.createSheet(year);
             XSSFCellStyle style = workbook.createCellStyle();
+            style.setAlignment(HorizontalAlignment.CENTER);
             style.setWrapText(true);
 
             row = sheet.createRow(0);
 
             cell = row.createCell(0);
             cell.setCellValue("Name");
+            cell.setCellStyle(style);
 
             cell = row.createCell(1);
             cell.setCellValue("Roll No");
+            cell.setCellStyle(style);
 
             cell = row.createCell(2);
             cell.setCellValue("RoomNo");
+            cell.setCellStyle(style);
 
             cell = row.createCell(3);
             cell.setCellValue("Mobile No");
+            cell.setCellStyle(style);
 
-            cell = row.createCell(4);
-            cell.setCellValue("Date and Time");
 
             int n = 1;
             List<String> keys = new ArrayList<>(data.keySet());
+
+            for(String rollNo:keys){
+
+                if(data.get(rollNo).keySet().contains(year)){
+
+                    List<String> dates = new ArrayList<>(Objects.requireNonNull(data.get(rollNo)).get(year).keySet());
+
+                    int c = 4;
+
+                    for(String date:dates){
+
+                        List<String> times = new ArrayList<>(data.get(rollNo).get(year).get(date).keySet());
+
+                        for(String time:times){
+                            cell = row.createCell(c);
+                            sheet.setColumnWidth(c, 5000);
+                            cell.setCellValue(date+" - "+time);
+                            c++;
+                        }
+                    }
+                }
+            }
+
             for(String rollNo:keys){
                 if(data.get(rollNo).keySet().contains(year)){
 
@@ -280,18 +351,22 @@ public class AttendanceDateDetails extends AppCompatActivity {
                     sheet.setColumnWidth(0, 4000);
                     cell = row.createCell(0);
                     cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
+                    cell.setCellStyle(style);
 
                     sheet.setColumnWidth(1, 4000);
                     cell = row.createCell(1);
                     cell.setCellValue(rollNo);
+                    cell.setCellStyle(style);
 
                     sheet.setColumnWidth(2, 4000);
                     cell = row.createCell(2);
                     cell.setCellValue(studentDetails.get(rollNo).getRoom_no());
+                    cell.setCellStyle(style);
 
                     sheet.setColumnWidth(3, 4000);
                     cell = row.createCell(3);
                     cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
+                    cell.setCellStyle(style);
 
                     List<String> currentDates = new ArrayList<>(data.get(rollNo).get(year).keySet());
 
@@ -301,21 +376,50 @@ public class AttendanceDateDetails extends AppCompatActivity {
                         sheet.setColumnWidth(c, 6000);
                         cell = row.createCell(c);
                         List<String> times = new ArrayList<>(data.get(rollNo).get(year).get(date).keySet());
-                        StringBuilder val = new StringBuilder("");
+
                         for(String time:times){
-                            val.append(time);
-                            val.append("-");
                             String att = data.get(rollNo).get(year).get(date).get(time);
-                            val.append(att);
+                            cell = row.createCell(c);
+                            cell.setCellValue(att);
+                            cell.setCellStyle(style);
+
+                            if(att.equalsIgnoreCase("Present"))
+                                CellUtil.setFont(cell, presentFont);
+                            else
+                                CellUtil.setFont(cell, absentFont);
+
                         }
-                        cell.setCellValue(date+"\n"+val+"\n");
-                        cell.setCellStyle(style);
                         c++;
                     }
 
                     n++;
                 }
             }
+
+
+            for(String rollNo: keys){
+                row = sheet.createRow(n);
+                if(data.get(rollNo).keySet().contains(year)){
+                    List<String> dates = new ArrayList<>(Objects.requireNonNull(data.get(rollNo)).get(year).keySet());
+                    int c = 4;
+
+                    for(String date:dates){
+
+                        sheet.setColumnWidth(c, 5000);
+                        List<String> times = new ArrayList<>(data.get(rollNo).get(year).get(date).keySet());
+
+                        for(String time:times){
+                            cell = row.createCell(c);
+                            cell.setCellValue(pre.get(time+date)+" - "+abs.get(time+date)+" - "+tot.get(time+date));
+                            cell.setCellStyle(style);
+                            c++;
+                        }
+                    }
+                }
+            }
+
+
+
         }
 
         try {
@@ -354,6 +458,8 @@ public class AttendanceDateDetails extends AppCompatActivity {
                                 }
                             }
                         }
+                        if(data.size() == 0)
+                            nodata = true;
                         pd1.dismiss();
                     }
 
@@ -363,6 +469,8 @@ public class AttendanceDateDetails extends AppCompatActivity {
                     }
                 });
             }
+            if(nodata)
+                Toast.makeText(getApplicationContext(), "No attendance was taken", Toast.LENGTH_SHORT).show();
         }
         else
             Toast.makeText(getApplicationContext(), "No Students are there", Toast.LENGTH_SHORT).show();
@@ -427,7 +535,6 @@ public class AttendanceDateDetails extends AppCompatActivity {
         final AlertDialog alert=builder.create();
 
         ListView l = v.findViewById(R.id.time_details);
-        alert.show();
 
         ArrayList<String> times = new ArrayList<>();
 
@@ -437,9 +544,16 @@ public class AttendanceDateDetails extends AppCompatActivity {
                 for(DataSnapshot time:snapshot.getChildren()){
                     times.add(time.getKey());
                 }
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(AttendanceDateDetails.this, android.R.layout.simple_list_item_1, times);
-                l.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
+                if(times.size() == 0){
+                    noDataFound();
+                    Toast.makeText(getApplicationContext(), "No attendance was taken on "+date, Toast.LENGTH_SHORT).show();
+                }
+                else{
+                    alert.show();
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(AttendanceDateDetails.this, android.R.layout.simple_list_item_1, times);
+                    l.setAdapter(adapter);
+                    adapter.notifyDataSetChanged();
+                }
 
             }
 
@@ -463,6 +577,30 @@ public class AttendanceDateDetails extends AppCompatActivity {
             startActivity(intent);
 
         });
+    }
+
+    private void noDataFound() {
+        Toolbar t = findViewById(R.id.toolbar2);
+        LinearLayout l = findViewById(R.id.a_layout);
+        t.setVisibility(View.INVISIBLE);
+        sp.setVisibility(View.INVISIBLE);
+        chooseFromDate.setVisibility(View.INVISIBLE);
+        ImageView nodata = findViewById(R.id.no_data);
+        nodata.setVisibility(View.VISIBLE);
+        l.setGravity(Gravity.CENTER_VERTICAL);
+    }
+
+    private void requestForPermission() {
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, PackageManager.PERMISSION_GRANTED);
+        if (Build.VERSION.SDK_INT >= 30){
+            if (!Environment.isExternalStorageManager()){
+                Toast.makeText(getApplicationContext(), "Please enable the manage permission", Toast.LENGTH_SHORT).show();
+                Intent getPermission = new Intent();
+                getPermission.setAction(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                startActivity(getPermission);
+            }
+        }
     }
 
     /*

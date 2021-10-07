@@ -26,15 +26,6 @@
             android:textSize="20sp" />
 
     </LinearLayout>
-    <Button
-        android:id="@+id/time_choose"
-        android:layout_margin="10dp"
-        android:gravity="center"
-        android:text="Choose Time"
-        android:textAllCaps="false"
-        android:textSize="20sp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
     <Spinner
         android:id="@+id/select_yr"
         android:entries="@array/year"
@@ -43,6 +34,34 @@
         android:background="@drawable/border"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <Button
+            android:visibility="gone"
+            android:id="@+id/date_choose"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:text="Choose Date"
+            android:layout_weight="1"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+        <Button
+            android:id="@+id/time_choose"
+            android:layout_margin="10dp"
+            android:gravity="center"
+            android:layout_weight="1"
+            android:text="Choose Time"
+            android:textAllCaps="false"
+            android:textSize="15sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
     <com.diegodobelo.expandingview.ExpandingList
         android:id="@+id/expanding_list_students"
         android:layout_width="match_parent"

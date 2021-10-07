@@ -6,6 +6,7 @@
     android:layout_height="wrap_content">
 
     <TextView
+        android:id="@+id/timesTitle"
         android:text="Specific Attendance Report"
         android:textSize="20sp"
         android:layout_gravity="center"
@@ -13,70 +14,97 @@
         android:layout_marginBottom="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
-    <LinearLayout
-        android:layout_margin="10dp"
-        android:padding="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_marginRight="10dp"
-            android:textStyle="bold"
-            android:textSize="15sp"
 
-            android:text="Total Number  of Students :"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:text="Total students"
-            android:textSize="15sp"
-            android:id="@+id/total_students"
-            android:gravity="left"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-    <LinearLayout
+    <Spinner
+        android:id="@+id/select_batch"
+        android:entries="@array/year"
         android:layout_margin="10dp"
         android:padding="10dp"
+        android:background="@drawable/border"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <Button
+        android:text="Choose Date"
+        android:textAllCaps="false"
+        android:layout_margin="10dp"
+        android:id="@+id/choose_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <ListView
+        android:id="@+id/times"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+    <LinearLayout
+        android:id="@+id/attendance_count"
+        android:visibility="gone"
+        android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
-        <TextView
-            android:layout_marginRight="10dp"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:layout_weight="1"
-            android:text="Total Presentees :"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:textSize="15sp"
-            android:id="@+id/presentees"
-            android:text="Total Presentees"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginRight="10dp"
+                android:textStyle="bold"
+                android:textSize="15sp"
 
-    <LinearLayout
-        android:layout_margin="10dp"
-        android:padding="10dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <TextView
-            android:layout_marginRight="10dp"
-            android:textStyle="bold"
-            android:textSize="15sp"
-            android:layout_weight="1"
-            android:text="Total Absentees :"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-        <TextView
-            android:textSize="15sp"
-            android:id="@+id/absenteed"
-            android:text="Total Presentees"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+                android:text="Total Number  of Students :"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:text="Total students"
+                android:textSize="15sp"
+                android:id="@+id/total_students"
+                android:gravity="left"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginRight="10dp"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:layout_weight="1"
+                android:text="Total Presentees :"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:textSize="15sp"
+                android:id="@+id/presentees"
+                android:text="Total Presentees"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_margin="10dp"
+            android:padding="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <TextView
+                android:layout_marginRight="10dp"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:layout_weight="1"
+                android:text="Total Absentees :"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <TextView
+                android:textSize="15sp"
+                android:id="@+id/absentees"
+                android:text="Total Absentees"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>

@@ -24,8 +24,13 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.util.CellUtil;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -51,6 +56,7 @@ public class CheckAttendance extends AppCompatActivity {
     String datePicked, timePicked;
     ImageView downloadAttendance;
     String year;
+    int p, a, t;
 
     XSSFWorkbook workbook;
     XSSFSheet sheet;
@@ -97,7 +103,7 @@ public class CheckAttendance extends AppCompatActivity {
         batch = i.getStringExtra("batch");
         year = i.getStringExtra("year");
 
-        filePath = new File(Environment.getExternalStorageDirectory()+"/Attendance on "+datePicked+".xls");
+        filePath = new File(Environment.getExternalStorageDirectory()+"/PEC HAC Report on "+datePicked+".xls");
 
         map = new HashMap<>();
         //Initializing objects for creating excel File
@@ -121,29 +127,53 @@ public class CheckAttendance extends AppCompatActivity {
     }
 
     private void addDataToExcel() {
+
+        XSSFFont presentFont = workbook.createFont();
+        presentFont.setColor(IndexedColors.GREEN.getIndex());
+
+        XSSFFont absentFont = workbook.createFont();
+        absentFont.setColor(IndexedColors.RED.getIndex());
+
         XSSFCellStyle style = workbook.createCellStyle();
         style.setWrapText(true);
+        style.setAlignment(HorizontalAlignment.CENTER);
 
         row = sheet.createRow(0);
 
         cell = row.createCell(0);
         cell.setCellValue("Name");
+        cell.setCellStyle(style);
 
         cell = row.createCell(1);
         cell.setCellValue("Roll No");
+        cell.setCellStyle(style);
 
         cell = row.createCell(2);
         cell.setCellValue("RoomNo");
+        cell.setCellStyle(style);
 
         cell = row.createCell(3);
         cell.setCellValue("Mobile No");
+        cell.setCellStyle(style);
 
         cell = row.createCell(4);
-        cell.setCellValue("Attendance");
+        cell.setCellStyle(style);
+
+
+        List<String> keys = new ArrayList<>(attendance.keySet());
+
+        for(int i = 0;i<attendance.size();i++){
+
+            String roomNo = keys.get(i);
+            sheet.setColumnWidth(4, 4000);
+            cell = row.createCell(4);
+            cell.setCellValue(datePicked+" - "+timePicked);
+            cell.setCellStyle(style);
+
+        }
 
 
         int n = 1;
-        List<String> keys = new ArrayList<>(attendance.keySet());
 
         for(int i = 0;i<attendance.size();i++){
 
@@ -155,25 +185,46 @@ public class CheckAttendance extends AppCompatActivity {
                 sheet.setColumnWidth(0, 4000);
                 cell = row.createCell(0);
                 cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getStudentname());
+                cell.setCellStyle(style);
 
                 sheet.setColumnWidth(1, 4000);
                 cell = row.createCell(1);
                 cell.setCellValue(rollNo);
+                cell.setCellStyle(style);
 
                 sheet.setColumnWidth(2, 4000);
                 cell = row.createCell(2);
                 cell.setCellValue(roomNo);
+                cell.setCellStyle(style);
 
                 sheet.setColumnWidth(3, 4000);
                 cell = row.createCell(3);
                 cell.setCellValue(Objects.requireNonNull(studentDetails.get(rollNo)).getMobile());
+                cell.setCellStyle(style);
 
                 sheet.setColumnWidth(4, 4000);
                 cell = row.createCell(4);
-                cell.setCellValue(datePicked+"\n"+timePicked+"-"+ Objects.requireNonNull(attendance.get(roomNo)).get(rollNo));
                 cell.setCellStyle(style);
+                String att = attendance.get(roomNo).get(rollNo);
+
+                if(att.equalsIgnoreCase("Present")){
+                    CellUtil.setFont(cell, presentFont);
+                    p++;
+                }
+                else{
+                    CellUtil.setFont(cell, absentFont);
+                    a++;
+                }
+
+                cell.setCellValue(att);
+
                 n++;
             }
+
+            row = sheet.createRow(n);
+            cell = row.createCell(4);
+            cell.setCellStyle(style);
+            cell.setCellValue(p+" - "+a+" - "+(p+a));
 
         }
 
@@ -212,11 +263,15 @@ public class CheckAttendance extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot roomNumbers:snapshot.getChildren()){
-                    attendance.put(roomNumbers.getKey(), new HashMap<>());
-                    flag = true;
-                    for(DataSnapshot rollNumber:roomNumbers.getChildren()){
-                        String rNo = roomNumbers.getKey();
-                        Objects.requireNonNull(attendance.get(rNo)).put(rollNumber.getKey(), rollNumber.getValue(String.class));
+                    if(roomNumbers.getKey().equals("count"))
+                        continue;
+                    else{
+                        attendance.put(roomNumbers.getKey(), new HashMap<>());
+                        flag = true;
+                        for(DataSnapshot rollNumber:roomNumbers.getChildren()){
+                            String rNo = roomNumbers.getKey();
+                            Objects.requireNonNull(attendance.get(rNo)).put(rollNumber.getKey(), rollNumber.getValue(String.class));
+                        }
                     }
                 }
 
@@ -309,7 +364,9 @@ public class CheckAttendance extends AppCompatActivity {
         TextView roll = view.findViewById(R.id.std_roll);
         roll.setText(student.getRoll_no());
         TextView branch = view.findViewById(R.id.std_branch);
-        branch.setText(student.getRoom_no());
+        branch.setText(student.getBranch());
+        TextView room = view.findViewById(R.id.std_room);
+        room.setText(student.getRoom_no());
     }
 
 }

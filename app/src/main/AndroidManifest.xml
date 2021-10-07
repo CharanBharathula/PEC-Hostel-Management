@@ -15,6 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.PECHostelManagement">
         <activity
+            android:name=".StudentAttendanceSpecific"
+            android:exported="true" />
+        <activity
             android:name=".UpdateAttendance"
             android:exported="true" />
         <activity

@@ -32,8 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        Initialization();
-
         new Handler().postDelayed(() -> {
             checkUser();
         }, 3000);
@@ -41,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkUser() {
+        fUser = FirebaseAuth.getInstance().getCurrentUser();
+        ref = FirebaseDatabase.getInstance().getReference();
         if(fUser!=null)
         {
             ref.child("Admin").addValueEventListener(new ValueEventListener() {
@@ -77,11 +77,6 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
-    }
-
-    private void Initialization() {
-        fUser = FirebaseAuth.getInstance().getCurrentUser();
-        ref = FirebaseDatabase.getInstance().getReference();
     }
 
 }

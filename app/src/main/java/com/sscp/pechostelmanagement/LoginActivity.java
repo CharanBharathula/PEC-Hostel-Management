@@ -71,7 +71,6 @@ public class LoginActivity extends AppCompatActivity {
 
 
         login.setOnClickListener(view -> {
-            Toast.makeText(getApplicationContext(), ""+adminEmail, Toast.LENGTH_SHORT).show();
             username = email.getEditText().getText().toString();
             pwd = password.getEditText().getText().toString();
             if(loginType.equals("Choose type of login"))

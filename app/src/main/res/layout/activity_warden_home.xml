@@ -33,7 +33,7 @@
         android:layout_height="500dp"
         android:orientation="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2">
+        app:layout_constraintTop_toBottomOf="@+id/warden_logout">
 
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
@@ -49,14 +49,16 @@
                     android:id="@+id/take_attendance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
+                    android:layout_margin="10dp"
                     android:src="@drawable/ic_add_attendance" />
             </RelativeLayout>
+
             <TextView
-                android:textSize="17sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Take Attendance"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:textSize="17sp" />
         </androidx.cardview.widget.CardView>
 
         <androidx.cardview.widget.CardView
@@ -73,15 +75,47 @@
                     android:id="@+id/check_attendance"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:src="@drawable/ic_check_attendance" />
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="25dp"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:src="@drawable/check_attendance" />
 
             </RelativeLayout>
+
             <TextView
-                android:textSize="17sp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="Check Attendance"
+                android:textSize="17sp" />
+        </androidx.cardview.widget.CardView>
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp"
+            android:layout_weight="1">
+
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="match_parent">
+
+                <ImageView
+                    android:id="@+id/update_attendance"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_margin="10dp"
+                    android:src="@drawable/ic_update" />
+
+            </RelativeLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Update Attendance"
+                android:textSize="17sp" />
         </androidx.cardview.widget.CardView>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

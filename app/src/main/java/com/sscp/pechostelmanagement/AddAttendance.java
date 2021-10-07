@@ -37,6 +37,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -57,11 +58,14 @@ public class AddAttendance extends AppCompatActivity {
     HashMap<String, StudentClass> studentDetails;
     HashMap<String, HashMap<String, String>> attendance;
     HashMap<String, String> attendanceData;
+    List<String> check;
 
     String key;
-    String year;
+    String batch;
     String newTime;
     String[] newString;
+    String currentYear;
+    int present, absent;
     String[] months = {"january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"};
 
     @Override
@@ -89,7 +93,7 @@ public class AddAttendance extends AppCompatActivity {
         year_selection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
-                year = adapterView.getItemAtPosition(i).toString();
+                batch = adapterView.getItemAtPosition(i).toString();
                 createItems();
             }
 
@@ -110,6 +114,7 @@ public class AddAttendance extends AppCompatActivity {
         ref = FirebaseDatabase.getInstance().getReference();
         key = ref.push().getKey();
         year_selection = findViewById(R.id.select_year);
+        check = new ArrayList<>();
 
     }
 
@@ -132,15 +137,16 @@ public class AddAttendance extends AppCompatActivity {
             e.printStackTrace();
         }
         newTime = _12HourSDF.format(_24HourDt);
+        currentYear = Arrays.asList(newString[0].split("-")).get(0);
     }
 
     public void createItems(){
-        if(year == null)
+        if(batch == null)
             Toast.makeText(getApplicationContext(), "Please choose year", Toast.LENGTH_SHORT).show();
         else{
             int[] colors = {R.color.black, R.color.blue, R.color.yellow, R.color.orange, R.color.pink};
 
-            ref.child("RoomDetails").child(year).addValueEventListener(new ValueEventListener() {
+            ref.child("RoomDetails").child(batch).addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     for(DataSnapshot roomNumbers:snapshot.getChildren()){
@@ -149,6 +155,7 @@ public class AddAttendance extends AppCompatActivity {
                         for(DataSnapshot snap:roomNumbers.getChildren()){
                             attendance.get(roomNumbers.getKey()).put(snap.getKey(), "Present");
                             attendanceData.put(snap.getKey(), "Present");
+                            present++;
                         }
 
                         int rnd = new Random().nextInt(colors.length);
@@ -190,11 +197,11 @@ public class AddAttendance extends AppCompatActivity {
 
     private void addAttendance() {
         String[] splitted = newString[0].split("-");
-        int currentMonth = Integer.parseInt(splitted[1]) - 1;
         String currentYear = splitted[0];
-        ref.child("Attendance").child(year).child(currentYear).child(newString[0]).child(newTime).setValue(attendance).addOnCompleteListener(task -> {
+        ref.child("Attendance").child(batch).child(currentYear).child(newString[0]).child(newTime).setValue(attendance).addOnCompleteListener(task -> {
             if(task.isSuccessful()){
                 pd.dismiss();
+                Toast.makeText(getApplicationContext(), "Attendance was successfully Uploaded", Toast.LENGTH_SHORT).show();
                 Intent intent = new Intent(AddAttendance.this, WardenHomeActivity.class);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                 startActivity(intent);
@@ -206,12 +213,18 @@ public class AddAttendance extends AppCompatActivity {
                 pd.dismiss();
             }
         });
+        HashMap<String, String> aCount = new HashMap<>();
+        aCount.put("presents", String.valueOf(present));
+        aCount.put("absents", String.valueOf(absent));
+        aCount.put("total", String.valueOf(present+absent));
 
-        ref.child("Students").child(year).addValueEventListener(new ValueEventListener() {
+        ref.child("Attendance").child(batch).child(currentYear).child(newString[0]).child(newTime).child("count").setValue(aCount);
+
+        ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot rollNo:snapshot.getChildren()){
-                    ref.child("Students").child(year).child(rollNo.getKey()).child("Attendance").child(newString[0]).child(newTime).setValue(attendanceData.get(rollNo.getKey()));
+                    ref.child("Students").child(batch).child(rollNo.getKey()).child("Attendance").child(currentYear).child(newString[0]).child(newTime).setValue(attendanceData.get(rollNo.getKey()));
                 }
 
             }
@@ -221,6 +234,7 @@ public class AddAttendance extends AppCompatActivity {
 
             }
         });
+
 
     }
 
@@ -238,6 +252,8 @@ public class AddAttendance extends AppCompatActivity {
                         entry.getValue().remove(s);
                     }
                     attendanceData.put(s, "Present");
+                    present++;
+                    absent--;
                 }
             }
             else{
@@ -247,6 +263,9 @@ public class AddAttendance extends AppCompatActivity {
                     if(attendance.get(title) != null){
                         attendance.get(title).put(s, "Absent");
                         attendanceData.put(s, "Absent");
+                        present--;
+                        absent++;
+
                     }
                     else {
                         attendance.get(title).put(s, "Present");
