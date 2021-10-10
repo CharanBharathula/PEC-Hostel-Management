@@ -65,7 +65,7 @@ public class UpdateAttendance extends AppCompatActivity {
     String[] newString;
     int mYear, mMonth, mDay;
     HashMap<String, HashMap<String, String>> attendance;
-    HashMap<String, String> attendanceData;
+    HashMap<String, HashMap<String, String>> attendanceForStudent;
     boolean isUploaded = false;
 
     ProgressDialog pd;
@@ -147,6 +147,7 @@ public class UpdateAttendance extends AppCompatActivity {
         pd = new ProgressDialog(this);
         attendance = new HashMap<>();
         studentDetails = new HashMap<>();
+        attendanceForStudent = new HashMap<>();
     }
 
     private void getCurrentDate() {
@@ -246,6 +247,19 @@ public class UpdateAttendance extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot rollNo:snapshot.getChildren()){
                     studentDetails.put(rollNo.getKey(), rollNo.getValue(StudentClass.class));
+                    attendanceForStudent.put(rollNo.getKey(), new HashMap<>());
+                    for(DataSnapshot child:rollNo.getChildren()){
+                        if(child.getKey().equals("Attendance")){
+                            for(DataSnapshot year:child.getChildren()){
+                                for(DataSnapshot date:year.getChildren()){
+                                    for(DataSnapshot times:date.getChildren()){
+                                        if(times.getKey().equals(time))
+                                            attendanceForStudent.get(rollNo.getKey()).put(times.getKey(), times.getValue(String.class));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -314,15 +328,18 @@ public class UpdateAttendance extends AppCompatActivity {
             if(check.isChecked()){
                 check.setChecked(false);
                 if(attendance.containsKey(title)){
-                    attendance.get(s).put(s, "Absent");
+                    attendance.get(title).put(s, "Absent");
+                    attendanceForStudent.get(s).put(time, "Absent");
                 }
             }
             else{
                 check.setChecked(true);
 
                 if(attendance.containsKey(title)){
-                    if(attendance.get(title) != null)
+                    if(attendance.get(title) != null){
                         attendance.get(title).put(s, "Present");
+                        attendanceForStudent.get(s).put(time, "Present");
+                    }
                 }
                 //item.removeSubItem(view);
             }
@@ -333,40 +350,32 @@ public class UpdateAttendance extends AppCompatActivity {
     private void addAttendance() {
         String[] splitted = newString[0].split("-");
         String currentYear = splitted[0];
-        ref.child("Attendance").child(batch).child(currentYear)
-                .child(datePicked).child(time).setValue(attendance).addOnCompleteListener(task -> {
-            if(task.isSuccessful()){
-                pd.dismiss();
-                Intent intent = new Intent(UpdateAttendance.this, WardenHomeActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-                startActivity(intent);
-                finish();
+        for(String roomNo:attendance.keySet()){
+            HashMap<String, Object> map = new HashMap<>();
+            for(Map.Entry<String, String> entry:attendance.get(roomNo).entrySet()){
+                map.put(entry.getKey(), entry.getValue());
             }
-            else{
-                FirebaseAuthException e = (FirebaseAuthException )task.getException();
-                Toast.makeText(UpdateAttendance.this, "Uploading Failed: "+e.getMessage(), Toast.LENGTH_SHORT).show();
-                pd.dismiss();
-            }
-        });
+            ref.child("Attendance").child(batch).child(currentYear)
+                    .child(datePicked).child(time).child(roomNo).updateChildren(map);
+        }
 
         ref.child("Students").child(batch).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot rollNo:snapshot.getChildren()){
                     StudentClass student = rollNo.getValue(StudentClass.class);
-
+                    HashMap<String, Object> map = null;
+                    map.put(time, attendanceForStudent.get(rollNo.getKey()).get(time));
                     ref.child("Students").child(batch).child(rollNo.getKey())
                             .child("Attendance")
                             .child(currentYear)
                             .child(datePicked).child(time)
-                            .setValue(attendance.get(student.getRoom_no()).get(rollNo.getKey())).addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            if(task.isSuccessful()){
-                                isUploaded = true;
-                            }
-                        }
-                    });
+                            .updateChildren(map)
+                            .addOnCompleteListener(task -> {
+                                if(task.isSuccessful()){
+                                    isUploaded = true;
+                                }
+                            });
                 }
                 if(isUploaded){
                     pd.dismiss();
@@ -388,6 +397,7 @@ public class UpdateAttendance extends AppCompatActivity {
     }
 
     private void retrieveStudent(String rollNo) {
+        
         StudentClass student = studentDetails.get(rollNo);
 
         View view=getLayoutInflater().inflate(R.layout.student_layout,null);
@@ -410,5 +420,6 @@ public class UpdateAttendance extends AppCompatActivity {
         TextView room = view.findViewById(R.id.std_room);
         room.setText(student.getRoom_no());
     }
+
 
 }

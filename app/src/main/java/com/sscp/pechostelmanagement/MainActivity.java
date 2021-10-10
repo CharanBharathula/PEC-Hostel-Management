@@ -32,9 +32,7 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
 
-        new Handler().postDelayed(() -> {
-            checkUser();
-        }, 3000);
+        new Handler().postDelayed(this::checkUser, 3000);
 
     }
 
@@ -48,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     adminEmail = snapshot.child("email").getValue(String.class);
                     adminKey = snapshot.child("key").getValue(String.class);
-
                     if(fUser.getUid().equals(adminKey))
                     {
                         Intent intent = new Intent(MainActivity.this, AdminHomeActivity.class);
