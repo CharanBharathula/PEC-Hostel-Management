@@ -8,8 +8,10 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -25,12 +27,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.lang.reflect.Array;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class LoginActivity extends AppCompatActivity {
 
     TextInputLayout email, password;
+    TextView signInLabel, messageLabel;
     String username, pwd;
     FirebaseAuth auth;
     FirebaseUser fUser;
@@ -52,7 +56,11 @@ public class LoginActivity extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
-
+        TextView label1, label2;
+        label1 = findViewById(R.id.label1);
+        label2 = findViewById(R.id.label2);
+        label1.setVisibility(View.VISIBLE);
+        label2.setVisibility(View.VISIBLE);
         Initialize();
 
         ref.addValueEventListener(new ValueEventListener() {
@@ -90,7 +98,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
                 loginType = adapterView.getItemAtPosition(i).toString();
-
+                Toast.makeText(LoginActivity.this, loginType, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -110,10 +118,16 @@ public class LoginActivity extends AppCompatActivity {
         email = findViewById(R.id.username);
         password = findViewById(R.id.pwd);
         login = findViewById(R.id.login_id);
+        signInLabel = findViewById(R.id.label1);
+        messageLabel = findViewById(R.id.label2);
 
         ref = FirebaseDatabase.getInstance().getReference();
         auth=FirebaseAuth.getInstance();
         selection = findViewById(R.id.spinner);
+
+        String[] persons = new String[]{"Choose type of login", "Warden", "Admin"};
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, persons );
+        selection.setAdapter(adapter);
     }
 
 
@@ -130,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
         {
             if(em.equals(adminEmail)) {
                 pd.dismiss();
-                Toast.makeText(getApplicationContext(), "Sorry wrong option was choosen", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Sorry wrong option was chosen", Toast.LENGTH_SHORT).show();
             }
             else {
                 checkExistence(em, pass);
@@ -138,7 +152,7 @@ public class LoginActivity extends AppCompatActivity {
         }
         else{
             pd.dismiss();
-            Toast.makeText(getApplicationContext(), "Sorry wrong option was choosen", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(), "Sorry wrong option was chosen", Toast.LENGTH_SHORT).show();
         }
     }
 

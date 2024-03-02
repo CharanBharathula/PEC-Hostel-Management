@@ -9,12 +9,11 @@ android {
 
     defaultConfig {
         applicationId "com.sscp.pechostelmanagement"
-        minSdk 19
+        minSdk 26
         targetSdk 30
         versionCode 1
         versionName "1.0"
         multiDexEnabled true
-
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
